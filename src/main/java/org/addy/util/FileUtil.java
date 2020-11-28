@@ -1,7 +1,9 @@
 package org.addy.util;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -11,6 +13,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 
 public final class FileUtil {
 	
@@ -144,6 +148,20 @@ public final class FileUtil {
 	public static boolean delete(String path) {
 		return delete(new File(path));
 	}
+	
+	public static void walkTree(File rootNode, FileFilter filter, TreeWalker treeWalker) {
+		if (rootNode.isDirectory()) {
+			if (treeWalker.beforeEnteringDirectory(rootNode)) {
+				File[] childNodes = rootNode.listFiles(filter);
+				for (File childNode : childNodes) {
+					walkTree(childNode, filter, treeWalker);
+				}
+				treeWalker.afterExitingDirectory(rootNode);
+			}
+		} else {
+			treeWalker.onLeaf(rootNode);
+		}
+	}
 
 	public static InputStream open(String path) throws FileNotFoundException {
 		return new FileInputStream(path);
@@ -167,5 +185,166 @@ public final class FileUtil {
 
 	public static PrintWriter appendText(String path) throws FileNotFoundException {
 		return new PrintWriter(new OutputStreamWriter(new FileOutputStream(path, true)), true);
+	}
+	
+	public static byte[] readAllBytes(InputStream input) throws IOException {
+		try (ByteArrayOutputStream output = new ByteArrayOutputStream()) {
+        	copyStream(input, output);
+        	return output.toByteArray();
+        }
+    }
+	
+	public static byte[] readAllBytes(File file) throws IOException {
+		try (FileInputStream input = new FileInputStream(file)) {
+			return readAllBytes(input);
+		}
+    }
+	
+	public static byte[] readAllBytes(String path) throws IOException {
+		try (FileInputStream input = new FileInputStream(path)) {
+			return readAllBytes(input);
+		}
+    }
+	
+	public static String readAllText(InputStream input) throws IOException {
+		StringBuilder sb = new StringBuilder();
+		String newLine = String.format("%n");
+		String line;
+		
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+        	while ((line = reader.readLine()) != null) {
+        		if (sb.length() != 0) sb.append(newLine);
+        		sb.append(line);
+        	}
+        }
+		
+		return sb.toString();
+    }
+	
+	public static String readAllText(File file) throws IOException {
+		try (FileInputStream input = new FileInputStream(file)) {
+			return readAllText(input);
+		}
+    }
+	
+	public static String readAllText(String path) throws IOException {
+		try (FileInputStream input = new FileInputStream(path)) {
+			return readAllText(input);
+		}
+    }
+	
+	public static String[] readAllLines(InputStream input) throws IOException {
+		List<String> lines = new ArrayList<>();
+		String line;
+		
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+        	while ((line = reader.readLine()) != null)
+        		lines.add(line);
+        }
+		
+		return lines.toArray(new String[] {});
+    }
+	
+	public static String[] readAllLines(File file) throws IOException {
+		try (FileInputStream input = new FileInputStream(file)) {
+			return readAllLines(input);
+		}
+    }
+	
+	public static String[] readAllLines(String path) throws IOException {
+		try (FileInputStream input = new FileInputStream(path)) {
+			return readAllLines(input);
+		}
+    }
+	
+	public static void eachLine(InputStream input, LineConsumer consumer) throws IOException {
+		String line;
+		try (BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+        	while ((line = reader.readLine()) != null)
+        		consumer.consume(line);
+        }
+    }
+	
+	public static void eachLine(File file, LineConsumer consumer) throws IOException {
+		try (FileInputStream input = new FileInputStream(file)) {
+			eachLine(input, consumer);
+		}
+    }
+	
+	public static void eachLine(String path, LineConsumer consumer) throws IOException {
+		try (FileInputStream input = new FileInputStream(path)) {
+			eachLine(input, consumer);
+		}
+    }
+	
+	public static void writeAllBytes(File file, byte[] bytes, boolean append) throws IOException {
+		try (FileOutputStream output = new FileOutputStream(file, append)) {
+			output.write(bytes);
+		}
+    }
+	
+	public static void writeAllBytes(String path, byte[] bytes, boolean append) throws IOException {
+		try (FileOutputStream output = new FileOutputStream(path, append)) {
+			output.write(bytes);
+		}
+    }
+	
+	public static void writeAllText(OutputStream output, String text) {
+		try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(output), true)) {
+        	writer.write(text);
+        }
+    }
+	
+	public static void writeAllText(File file, String text, boolean append) throws IOException {
+		try (FileOutputStream output = new FileOutputStream(file, append)) {
+			writeAllText(output, text);
+		}
+    }
+	
+	public static void writeAllText(String path, String text, boolean append) throws IOException {
+		try (FileOutputStream output = new FileOutputStream(path, append)) {
+			writeAllText(output, text);
+		}
+    }
+	
+	public static void writeAllLines(OutputStream output, String[] lines) {
+		String newLine = String.format("%n");
+		try (PrintWriter writer = new PrintWriter(new OutputStreamWriter(output), true)) {
+        	for (int i = 0; i < lines.length; ++i) {
+        		if (i > 0) writer.write(newLine);
+        		writer.write(lines[i]);
+        	}
+        }
+    }
+	
+	public static void writeAllLines(File file, String[] lines, boolean append) throws IOException {
+		try (FileOutputStream output = new FileOutputStream(file, append)) {
+			writeAllLines(output, lines);
+		}
+    }
+	
+	public static void writeAllLines(String path, String[] lines, boolean append) throws IOException {
+		try (FileOutputStream output = new FileOutputStream(path, append)) {
+			writeAllLines(output, lines);
+		}
+    }
+	
+	public static interface TreeWalker {
+		boolean beforeEnteringDirectory(File node);
+		void onLeaf(File node);
+		void afterExitingDirectory(File node);
+	}
+	
+	public abstract static class AbstractTreeWalker implements TreeWalker {
+		public boolean beforeEnteringDirectory(File node) {
+			return true;
+		}
+
+		public void afterExitingDirectory(File node) {
+		}
+	}
+	
+	public static interface LineConsumer {
+		void consume(String line);
 	}
 }
