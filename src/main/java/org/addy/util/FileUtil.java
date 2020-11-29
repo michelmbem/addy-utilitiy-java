@@ -13,8 +13,10 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Pattern;
 
 public final class FileUtil {
 	
@@ -64,6 +66,21 @@ public final class FileUtil {
 		}
 		return fileName;
 	}
+	
+	public static String getContentType(File file) throws IOException {
+        String contentType = Files.probeContentType(file.toPath());
+        if (contentType == null) {
+            switch (getExtension(file.getPath())) {
+                case ".json":
+                    return "application/json";
+                case ".jsonp":
+                    return "application/javascript";
+                default:
+                    return "application/octet-stream";
+            }
+        }
+        return contentType;
+    }
 
 	public static String combine(String path1, String path2) {
 		return (new File(new File(path1), path2)).getPath();
@@ -329,6 +346,12 @@ public final class FileUtil {
 		}
     }
 	
+	///////////////// INNER CLASSES AND INTERFACES ///////////////////
+	
+	public static interface LineConsumer {
+		void consume(String line);
+	}
+	
 	public static interface TreeWalker {
 		boolean beforeEnteringDirectory(File node);
 		void onLeaf(File node);
@@ -344,7 +367,103 @@ public final class FileUtil {
 		}
 	}
 	
-	public static interface LineConsumer {
-		void consume(String line);
+	public static class PatternFilter implements FileFilter {
+		
+		private final Pattern pattern;
+		
+		public PatternFilter(Pattern pattern) {
+			this.pattern = pattern;
+		}
+		
+		public PatternFilter(String pattern) {
+			this.pattern = Pattern.compile(pattern);
+		}
+
+		@Override
+		public boolean accept(File file) {
+			return pattern.matcher(file.getPath()).matches();
+		}
+
+		public Pattern getPattern() {
+			return pattern;
+		}
+		
+	}
+	
+	public static class ExtensionFilter implements FileFilter {
+		
+		private final String[] extensions;
+		
+		public ExtensionFilter(String[] extensions) {
+			this.extensions = extensions;
+		}
+		
+		public ExtensionFilter(String extensions) {
+			this.extensions = extensions.split("\\s*,\\s*");
+		}
+
+		@Override
+		public boolean accept(File file) {
+			if (file.isDirectory()) return true;
+			
+			String extension = getExtension(file.getPath());
+			for (String ext : extensions) {
+				if (ext.equalsIgnoreCase(extension))
+					return true;
+			}
+			
+			return false;
+		}
+
+		public String[] getExtensions() {
+			return extensions;
+		}
+		
+	}
+	
+	public static class ContentTypeFilter implements FileFilter {
+		
+		private final String[] contentTypes;
+		private Pattern[] patterns;
+		
+		public ContentTypeFilter(String[] contentTypes) {
+			this.contentTypes = contentTypes;
+			initPatterns();
+		}
+		
+		public ContentTypeFilter(String contentTypes) {
+			this.contentTypes = contentTypes.split("\\s*,\\s*");
+			initPatterns();
+		}
+
+		@Override
+		public boolean accept(File file) {
+			if (file.isDirectory()) return true;
+			
+			try {
+				String contentType = getContentType(file);
+				for (Pattern pattern : patterns) {
+					if (pattern.matcher(contentType).matches())
+						return true;
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			
+			return false;
+		}
+
+		public String[] getContentTypes() {
+			return contentTypes;
+		}
+		
+		protected void initPatterns() {
+			patterns = new Pattern[contentTypes.length];
+			for (int i = 0; i < patterns.length; ++i) {
+				String regex = contentTypes[i].replace("*", ".*");
+				patterns[i] = Pattern.compile(regex);
+			}
+		}
+		
 	}
 }

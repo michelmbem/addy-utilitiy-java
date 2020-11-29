@@ -3,13 +3,17 @@ package org.addy.util;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
 
 public final class DateUtil {
 	
-	public static final int ORIGIN_OF_DATES = 1970;
+	public static final int ORIGIN_OF_DATES = LocalDate.MIN.getYear();
 	public static final int HOURS_PER_DAY = 24;
 	public static final int MINUTES_PER_HOUR = 60;
 	public static final int MINUTES_PER_DAY = 1440;
@@ -32,7 +36,7 @@ public final class DateUtil {
 	}
 
 	public static Date time(int hour, int minute, int second) {
-		return dateTime(1970, 1, 1, hour, minute, second);
+		return dateTime(ORIGIN_OF_DATES, 1, 1, hour, minute, second);
 	}
 
 	public static Date now() {
@@ -162,6 +166,23 @@ public final class DateUtil {
 		calendar.add(Calendar.MILLISECOND, millis);
 		return calendar.getTime();
 	}
+	
+	public static Date concat(Date date, Date time) {
+		Calendar dateCal = Calendar.getInstance();
+		dateCal.setTime(date);
+		Calendar timeCal = Calendar.getInstance();
+		timeCal.setTime(time);
+		Calendar finalCal = Calendar.getInstance();
+		finalCal.clear();
+		finalCal.set(Calendar.YEAR, dateCal.get(Calendar.YEAR));
+		finalCal.set(Calendar.MONTH, dateCal.get(Calendar.MONTH));
+		finalCal.set(Calendar.DATE, dateCal.get(Calendar.DATE));
+		finalCal.set(Calendar.HOUR_OF_DAY, timeCal.get(Calendar.HOUR_OF_DAY));
+		finalCal.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
+		finalCal.set(Calendar.SECOND, timeCal.get(Calendar.SECOND));
+		finalCal.set(Calendar.MILLISECOND, timeCal.get(Calendar.MILLISECOND));
+		return finalCal.getTime();
+	}
 
 	public static Date getLastSecondOfDay(Date date) {
 		return addSeconds(getDate(date), SECONDS_PER_DAY);
@@ -179,8 +200,7 @@ public final class DateUtil {
 	}
 
 	public static int getYearsBetween(Date from, Date to) {
-		if (to.before(from))
-			return -getYearsBetween(to, from);
+		if (to.before(from)) return -getYearsBetween(to, from);
 
 		Calendar fromCal = Calendar.getInstance();
 		fromCal.setTime(from);
@@ -190,16 +210,13 @@ public final class DateUtil {
 		int yearDiff = toCal.get(Calendar.YEAR) - fromCal.get(Calendar.YEAR);
 		int monthDiff = toCal.get(Calendar.MONTH) - fromCal.get(Calendar.MONTH);
 		int dayDiff = toCal.get(Calendar.DATE) - fromCal.get(Calendar.DATE);
-		if (monthDiff < 0 || (monthDiff == 0 && dayDiff < 0)) {
-			yearDiff--;
-		}
+		if (monthDiff < 0 || (monthDiff == 0 && dayDiff < 0)) --yearDiff;
 
 		return yearDiff;
 	}
 
 	public static int getMonthsBetween(Date from, Date to) {
-		if (to.before(from))
-			return -getMonthsBetween(to, from);
+		if (to.before(from)) return -getMonthsBetween(to, from);
 
 		Calendar fromCal = Calendar.getInstance();
 		fromCal.setTime(from);
@@ -211,11 +228,9 @@ public final class DateUtil {
 		int dayDiff = toCal.get(Calendar.DATE) - fromCal.get(Calendar.DATE);
 		if (monthDiff < 0) {
 			monthDiff += 12;
-			yearDiff--;
+			--yearDiff;
 		}
-		if (dayDiff < 0) {
-			monthDiff--;
-		}
+		if (dayDiff < 0) --monthDiff;
 
 		return 12 * yearDiff + monthDiff;
 	}
@@ -301,5 +316,29 @@ public final class DateUtil {
 
 	public static Date parseDate(String value) throws ParseException {
 		return parseDate(value, Locale.getDefault());
+	}
+	
+	public static Date toDate(LocalDateTime localDateTime) {
+		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
+	}
+	
+	public static LocalDateTime toLocalDateTime(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+	}
+	
+	public static Date toDate(LocalDate localDate) {
+		return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
+	}
+	
+	public static LocalDate toLocalDate(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+	}
+	
+	public static Date toDate(LocalTime localTime) {
+		return Date.from(localTime.atDate(LocalDate.MIN).atZone(ZoneId.systemDefault()).toInstant());
+	}
+	
+	public static LocalTime toLocalTime(Date date) {
+		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
 	}
 }
