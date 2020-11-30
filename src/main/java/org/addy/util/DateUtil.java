@@ -167,7 +167,7 @@ public final class DateUtil {
 		return calendar.getTime();
 	}
 	
-	public static Date concat(Date date, Date time) {
+	public static Date combine(Date date, Date time) {
 		Calendar dateCal = Calendar.getInstance();
 		dateCal.setTime(date);
 		Calendar timeCal = Calendar.getInstance();
