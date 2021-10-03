@@ -31,8 +31,14 @@ import net.sf.jasperreports.engine.export.ooxml.JRDocxExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRPptxExporter;
 import net.sf.jasperreports.engine.export.ooxml.JRXlsxExporter;
 import net.sf.jasperreports.export.Exporter;
+import net.sf.jasperreports.export.ExporterOutput;
 import net.sf.jasperreports.export.SimpleExporterInput;
+import net.sf.jasperreports.export.SimpleGraphics2DExporterOutput;
+import net.sf.jasperreports.export.SimpleHtmlExporterOutput;
+import net.sf.jasperreports.export.SimpleJsonExporterOutput;
 import net.sf.jasperreports.export.SimpleOutputStreamExporterOutput;
+import net.sf.jasperreports.export.SimpleWriterExporterOutput;
+import net.sf.jasperreports.export.SimpleXmlExporterOutput;
 import net.sf.jasperreports.swing.JRViewer;
 
 public final class JRHelper {
@@ -101,7 +107,7 @@ public final class JRHelper {
 		Exporter exporter = getExporter(FileUtil.getExtension(destPath).toLowerCase());
 		if (exporter != null) {
 			exporter.setExporterInput(new SimpleExporterInput(jPrint));
-			exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(destPath));
+			exporter.setExporterOutput(getExporterOutput(destPath));
 			exporter.exportReport();
 		}
 	}
@@ -111,7 +117,7 @@ public final class JRHelper {
 		Exporter exporter = getExporter(format);
 		if (exporter != null) {
 			exporter.setExporterInput(new SimpleExporterInput(jPrint));
-			exporter.setExporterOutput(new SimpleOutputStreamExporterOutput(out));
+			exporter.setExporterOutput(getExporterOutput(out, format));
 			exporter.exportReport();
 		}
 	}
@@ -154,5 +160,49 @@ public final class JRHelper {
 			default:
 				return null;
 		} 
+	}
+
+	private static ExporterOutput getExporterOutput(String path) {
+		switch (FileUtil.getExtension(path).toLowerCase()) {
+			case ".jpg":
+			case ".jpeg":
+			case ".png":
+				return new SimpleGraphics2DExporterOutput();
+			case ".txt":
+			case ".csv":
+				return new SimpleWriterExporterOutput(path);
+			case ".json":
+				return new SimpleJsonExporterOutput(path);
+			case ".xml":
+			case ".jrpxml":
+				return new  SimpleXmlExporterOutput(path);
+			case ".htm":
+			case ".html":
+				return new SimpleHtmlExporterOutput(path);
+			default:
+				return new SimpleOutputStreamExporterOutput(path);
+		}
+	}
+
+	private static ExporterOutput getExporterOutput(OutputStream out, String format) {
+		switch (format) {
+			case ".jpg":
+			case ".jpeg":
+			case ".png":
+				return new SimpleGraphics2DExporterOutput();
+			case ".txt":
+			case ".csv":
+				return new SimpleWriterExporterOutput(out);
+			case ".json":
+				return new SimpleJsonExporterOutput(out);
+			case ".xml":
+			case ".jrpxml":
+				return new  SimpleXmlExporterOutput(out);
+			case ".htm":
+			case ".html":
+				return new SimpleHtmlExporterOutput(out);
+			default:
+				return new SimpleOutputStreamExporterOutput(out);
+		}
 	}
 }
