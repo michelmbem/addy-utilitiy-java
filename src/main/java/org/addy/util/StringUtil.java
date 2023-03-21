@@ -16,7 +16,7 @@ public final class StringUtil {
 	public static final String DEFAULT_SPLIT_REGEX = "[\\W_]+";
 	
 	private static final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-	private static final String ACCENTS = "ΐΑΒΓΔΕΗΘΙΚΛΜΝΞΟÒΣΤΥΦΩΪΫάέΰαβγδεηθικλμνξοπςστυφωϊϋόύÿ";
+	private static final String ACCENTS = "Γ€ΓΓ‚ΓƒΓ„Γ…Γ‡ΓΓ‰ΓΓ‹ΓΓΓΓΓ’Γ“Γ”Γ•Γ–Γ™ΓΓ›ΓΓΓ Γ΅ΓΆΓ£Γ¤Γ¥Γ§Γ¨Γ©ΓªΓ«Γ¬Γ­Γ®Γ―Γ°Γ²Γ³Γ΄ΓµΓ¶ΓΉΓΊΓ»ΓΌΓ½ΓΏ";
     private static final String NO_ACCENT = "AAAAAACEEEEIIIIOOOOOUUUUYaaaaaaceeeeiiiioooooouuuuyy";
     private static final String ACCEPTED_SPECIAL_CHARS = ".-_";
     

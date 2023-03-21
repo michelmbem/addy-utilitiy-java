@@ -13,6 +13,17 @@
 	<version>1.0.0</version>
 	<name>Addy Utilities</name>
 	<description>General utility class library by Addy</description>
+
+    <repositories>
+        <repository>
+            <id>jr-ce-releases</id>
+            <url>https://jaspersoft.artifactoryonline.com/jaspersoft/jr-ce-releases</url>
+        </repository>
+        <repository>
+            <id>jasper-3rd-party</id>
+            <url>https://jaspersoft.jfrog.io/jaspersoft/third-party-ce-artifacts/</url>
+        </repository>
+    </repositories>
 	
 	<dependencies>
         <dependency>

@@ -81,20 +81,20 @@ public final class ImageHelper {
             float aspectRatio = (float) width / height;
             float widthRatio = (float) width / desiredWidth;
             float heightRatio = (float) height / desiredHeight;
-            int realWidth, realHeight;
+            int effectiveWidth, effectiveHeight;
 
             if (widthRatio > heightRatio) {
-                realWidth = desiredWidth;
-                realHeight = (int) (realWidth / aspectRatio);
+                effectiveWidth = desiredWidth;
+                effectiveHeight = (int) (effectiveWidth / aspectRatio);
             } else {
-                realHeight = desiredHeight;
-                realWidth = (int) (realHeight * aspectRatio);
+                effectiveHeight = desiredHeight;
+                effectiveWidth = (int) (effectiveHeight * aspectRatio);
             }
 
-            resizedImage = new BufferedImage(realWidth, realHeight, BufferedImage.TYPE_INT_RGB);
+            resizedImage = new BufferedImage(effectiveWidth, effectiveHeight, BufferedImage.TYPE_INT_RGB);
             Graphics2D g = (Graphics2D) resizedImage.getGraphics();
 			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.drawImage(originalImage, 0, 0, realWidth, realHeight, 0, 0, width, height, null);
+            g.drawImage(originalImage, 0, 0, effectiveWidth, effectiveHeight, 0, 0, width, height, null);
             g.dispose();
         } else {
             resizedImage = new BufferedImage(desiredWidth, desiredHeight, BufferedImage.TYPE_INT_RGB);
