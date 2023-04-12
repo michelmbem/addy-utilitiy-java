@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 public final class FileUtil {
-	
 	private FileUtil() {
 	}
 
@@ -348,11 +347,11 @@ public final class FileUtil {
 	
 	///////////////// INNER CLASSES AND INTERFACES ///////////////////
 	
-	public static interface LineConsumer {
+	public interface LineConsumer {
 		void consume(String line);
 	}
 	
-	public static interface TreeWalker {
+	public interface TreeWalker {
 		boolean beforeEnteringDirectory(File node);
 		void onLeaf(File node);
 		void afterExitingDirectory(File node);

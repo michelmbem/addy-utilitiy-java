@@ -42,9 +42,7 @@ import net.sf.jasperreports.export.SimpleXmlExporterOutput;
 import net.sf.jasperreports.swing.JRViewer;
 
 public final class JRHelper {
-	
-	private JRHelper() {
-	}
+	private JRHelper() {}
 	
 	public static void viewReport(String path, Map<String, Object> parameters, Connection connection) throws Exception {
 		JasperPrint jPrint = JasperFillManager.fillReport(path, parameters, connection);

@@ -1,21 +1,14 @@
 package org.addy.util;
 
-import java.awt.Color;
-import java.awt.Graphics2D;
-import java.awt.Image;
-import java.awt.Paint;
-import java.awt.RenderingHints;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
-import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Base64;
-
-import javax.imageio.ImageIO;
-
+import com.drew.imaging.jpeg.JpegMetadataReader;
+import com.drew.imaging.jpeg.JpegProcessingException;
+import com.drew.imaging.jpeg.JpegSegmentMetadataReader;
+import com.drew.metadata.Directory;
+import com.drew.metadata.Metadata;
+import com.drew.metadata.MetadataException;
+import com.drew.metadata.exif.ExifDirectoryBase;
+import com.drew.metadata.exif.ExifIFD0Directory;
+import com.drew.metadata.exif.ExifReader;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.rendering.PDFRenderer;
 import org.jcodec.api.FrameGrab;
@@ -27,17 +20,18 @@ import org.jcodec.common.model.Picture;
 import org.jcodec.containers.mp4.demuxer.MP4Demuxer;
 import org.jcodec.scale.AWTUtil;
 
-import com.drew.imaging.jpeg.JpegMetadataReader;
-import com.drew.imaging.jpeg.JpegProcessingException;
-import com.drew.imaging.jpeg.JpegSegmentMetadataReader;
-import com.drew.metadata.Directory;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.MetadataException;
-import com.drew.metadata.exif.ExifIFD0Directory;
-import com.drew.metadata.exif.ExifReader;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+import java.awt.image.RenderedImage;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.util.Base64;
+import java.util.List;
 
 public final class ImageHelper {
-
     public static final int CW = 1;
     public static final int CCW = -1;
     public static final int DCW = 2;
@@ -56,8 +50,7 @@ public final class ImageHelper {
     public static final int ORIENTATION_FLIP_HORIZONTAL_ROTATE_CW = 7;
     public static final int ORIENTATION_ROTATE_CCW = 8;
 
-    private ImageHelper() {
-    }
+    private ImageHelper() {}
     
     public static BufferedImage buffer(Image originalImage, int imageType) {
         if (originalImage instanceof BufferedImage)
@@ -235,11 +228,11 @@ public final class ImageHelper {
         	if (!FileUtil.getContentType(jpegFile).equalsIgnoreCase("image/jpeg"))
                 return ORIENTATION_UNDETERMINED;
         	
-            Iterable<JpegSegmentMetadataReader> readers = Arrays.asList(new ExifReader());
+            Iterable<JpegSegmentMetadataReader> readers = List.of(new ExifReader());
             Metadata metadata = JpegMetadataReader.readMetadata(jpegFile, readers);
             Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-            if (directory == null) return ORIENTATION_UNDETERMINED;
-            return directory.getInt(ExifIFD0Directory.TAG_ORIENTATION);
+
+            return directory != null ? directory.getInt(ExifDirectoryBase.TAG_ORIENTATION) : ORIENTATION_UNDETERMINED;
         } catch (IOException | MetadataException | JpegProcessingException ex) {
             ex.printStackTrace();
             return ORIENTATION_UNDETERMINED;

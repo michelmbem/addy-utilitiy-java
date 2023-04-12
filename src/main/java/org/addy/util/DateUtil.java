@@ -12,7 +12,6 @@ import java.util.Date;
 import java.util.Locale;
 
 public final class DateUtil {
-	
 	public static final int ORIGIN_OF_DATES = LocalDate.MIN.getYear();
 	public static final int HOURS_PER_DAY = 24;
 	public static final int MINUTES_PER_HOUR = 60;
@@ -21,8 +20,7 @@ public final class DateUtil {
 	public static final int SECONDS_PER_HOUR = 3600;
 	public static final int SECONDS_PER_DAY = 86400;
 
-	private DateUtil() {
-	}
+	private DateUtil() {}
 
 	public static Date dateTime(int year, int month, int day, int hour, int minute, int second) {
 		Calendar calendar = Calendar.getInstance();

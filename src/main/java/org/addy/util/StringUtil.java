@@ -6,9 +6,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 
 public final class StringUtil {
-	
-	private StringUtil() {
-	}
+	private StringUtil() {}
 	
 	public static final char DEFAULT_QUOTE = '\'';
 	public static final char DEFAULT_PAD_CHAR = ' ';
