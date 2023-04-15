@@ -9,12 +9,9 @@ import java.lang.reflect.Modifier;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.text.ParseException;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeParseException;
+import java.time.*;
 import java.util.Date;
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public final class TypeConverter {
@@ -43,7 +40,7 @@ public final class TypeConverter {
     }
 
     public static byte toByte(Object value) {
-        if (value == null) return 0;
+        if (value == null) return (byte) 0;
         if (value instanceof Boolean) return (byte) ((boolean) value ? 1 : 0);
         if (value instanceof Number) return ((Number) value).byteValue();
         if (value instanceof CharSequence) return Byte.parseByte(value.toString());
@@ -51,7 +48,7 @@ public final class TypeConverter {
     }
 
     public static short toShort(Object value) {
-        if (value == null) return 0;
+        if (value == null) return (short) 0;
         if (value instanceof Boolean) return (short) ((boolean) value ? 1 : 0);
         if (value instanceof Number) return ((Number) value).shortValue();
         if (value instanceof CharSequence) return Short.parseShort(value.toString());
@@ -91,32 +88,34 @@ public final class TypeConverter {
     }
 
     public static BigInteger toBigInteger(Object value) {
-        if (value == null) return BigInteger.ZERO;
+        if (value == null || value instanceof BigInteger) return (BigInteger) value;
         if (value instanceof Boolean) return (boolean) value ? BigInteger.ONE : BigInteger.ZERO;
-        if (value instanceof BigInteger) return (BigInteger) value;
-        if (value instanceof BigDecimal) return ((BigDecimal) value).toBigInteger();
-        if (value instanceof Number) return BigInteger.valueOf(((Number) value).longValue());
-        if (value instanceof CharSequence) return new BigInteger(value.toString());
         return (BigInteger) convertByIntrospection(value, BigInteger.class);
     }
 
     public static BigDecimal toBigDecimal(Object value) {
-        if (value == null) return BigDecimal.ZERO;
+        if (value == null || value instanceof BigDecimal) return (BigDecimal) value;
         if (value instanceof Boolean) return (boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
-        if (value instanceof BigDecimal) return (BigDecimal) value;
-        if (value instanceof BigInteger) return new BigDecimal((BigInteger) value);
-        if (value instanceof Number || value instanceof CharSequence) return new BigDecimal(value.toString());
         return (BigDecimal) convertByIntrospection(value, BigDecimal.class);
     }
 
     public static Date toDate(Object value) {
         if (value == null || value instanceof Date) return (Date) value;
 
+        if (value instanceof ZonedDateTime)
+            return Date.from(((ZonedDateTime) value).toInstant());
+
+        if (value instanceof OffsetDateTime)
+            return Date.from(((OffsetDateTime) value).toInstant());
+
         if (value instanceof LocalDateTime)
             return Date.from(((LocalDateTime) value).atZone(ZoneId.systemDefault()).toInstant());
 
         if (value instanceof LocalDate)
             return Date.from(((LocalDate) value).atStartOfDay(ZoneId.systemDefault()).toInstant());
+
+        if (value instanceof OffsetTime)
+            return Date.from(((OffsetTime) value).atDate(LocalDate.MIN).toInstant());
 
         if (value instanceof LocalTime)
             return Date.from(((LocalTime) value).atDate(LocalDate.MIN).atZone(ZoneId.systemDefault()).toInstant());
@@ -132,40 +131,46 @@ public final class TypeConverter {
         return (Date) convertByIntrospection(value, Date.class);
     }
 
-    public static LocalDate toLocalDate(Object value) {
-        if (value == null || value instanceof LocalDate) return (LocalDate) value;
-        if (value instanceof LocalDateTime) return ((LocalDateTime) value).toLocalDate();
+    public static ZonedDateTime toZonedDateTime(Object value) {
+        if (value == null || value instanceof ZonedDateTime) return (ZonedDateTime) value;
+
+        if (value instanceof LocalDateTime)
+            return ((LocalDateTime) value).atZone(ZoneId.systemDefault());
+
+        if (value instanceof LocalDate)
+            return ((LocalDate) value).atStartOfDay().atZone(ZoneId.systemDefault());
+
+        if (value instanceof OffsetTime)
+            return ((OffsetTime) value).atDate(LocalDate.MIN).toZonedDateTime();
+
+        if (value instanceof LocalTime)
+            return ((LocalTime) value).atDate(LocalDate.MIN).atZone(ZoneId.systemDefault());
 
         if (value instanceof Date)
-            return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+            return ((Date) value).toInstant().atZone(ZoneId.systemDefault());
 
-        if (value instanceof CharSequence) {
-            try {
-                return LocalDate.parse(value.toString());
-            } catch (DateTimeParseException e) {
-                throw new ClassCastException();
-            }
-        }
-
-        return (LocalDate) convertByIntrospection(value, LocalDate.class);
+        return (ZonedDateTime) convertByIntrospection(value, ZonedDateTime.class);
     }
 
-    public static LocalTime toLocalTime(Object value) {
-        if (value == null || value instanceof LocalTime) return (LocalTime) value;
-        if (value instanceof LocalDateTime) return ((LocalDateTime) value).toLocalTime();
+    public static OffsetDateTime toOffsetDateTime(Object value) {
+        if (value == null || value instanceof OffsetDateTime) return (OffsetDateTime) value;
+
+        if (value instanceof LocalDateTime)
+            return ((LocalDateTime) value).atOffset((ZoneOffset) ZoneId.systemDefault());
+
+        if (value instanceof LocalDate)
+            return ((LocalDate) value).atStartOfDay().atOffset((ZoneOffset) ZoneId.systemDefault());
+
+        if (value instanceof OffsetTime)
+            return ((OffsetTime) value).atDate(LocalDate.MIN);
+
+        if (value instanceof LocalTime)
+            return ((LocalTime) value).atDate(LocalDate.MIN).atOffset((ZoneOffset) ZoneId.systemDefault());
 
         if (value instanceof Date)
-            return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+            return ((Date) value).toInstant().atOffset((ZoneOffset) ZoneId.systemDefault());
 
-        if (value instanceof CharSequence) {
-            try {
-                return LocalTime.parse(value.toString());
-            } catch (DateTimeParseException e) {
-                throw new ClassCastException();
-            }
-        }
-
-        return (LocalTime) convertByIntrospection(value, LocalTime.class);
+        return (OffsetDateTime) convertByIntrospection(value, OffsetDateTime.class);
     }
 
     public static LocalDateTime toLocalDateTime(Object value) {
@@ -176,15 +181,34 @@ public final class TypeConverter {
         if (value instanceof Date)
             return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
-        if (value instanceof CharSequence) {
-            try {
-                return LocalDateTime.parse(value.toString());
-            } catch (DateTimeParseException e) {
-                throw new ClassCastException();
-            }
-        }
-
         return (LocalDateTime) convertByIntrospection(value, LocalDateTime.class);
+    }
+
+    public static LocalDate toLocalDate(Object value) {
+        if (value == null || value instanceof LocalDate) return (LocalDate) value;
+
+        if (value instanceof Date)
+            return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
+
+        return (LocalDate) convertByIntrospection(value, LocalDate.class);
+    }
+
+    public static OffsetTime toOffsetTime(Object value) {
+        if (value == null || value instanceof OffsetTime) return (OffsetTime) value;
+
+        if (value instanceof Date)
+            return ((Date) value).toInstant().atOffset((ZoneOffset) ZoneId.systemDefault()).toOffsetTime();
+
+        return (OffsetTime) convertByIntrospection(value, OffsetTime.class);
+    }
+
+    public static LocalTime toLocalTime(Object value) {
+        if (value == null || value instanceof LocalTime) return (LocalTime) value;
+
+        if (value instanceof Date)
+            return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
+
+        return (LocalTime) convertByIntrospection(value, LocalTime.class);
     }
 
     public static Object toType(Object value, Class<?> targetType) {
@@ -198,12 +222,14 @@ public final class TypeConverter {
         if (targetType == BigInteger.class) return toBigInteger(value);
         if (targetType == BigDecimal.class) return toBigDecimal(value);
         if (targetType == Date.class) return toDate(value);
-        if (targetType == LocalDate.class) return toLocalDate(value);
-        if (targetType == LocalTime.class) return toLocalTime(value);
+        if (targetType == ZonedDateTime.class) return toZonedDateTime(value);
+        if (targetType == OffsetDateTime.class) return toOffsetDateTime(value);
         if (targetType == LocalDateTime.class) return toLocalDateTime(value);
+        if (targetType == LocalDate.class) return toLocalDate(value);
+        if (targetType == OffsetTime.class) return toOffsetTime(value);
+        if (targetType == LocalTime.class) return toLocalTime(value);
         if (targetType == String.class) return String.valueOf(value);
-        if (value == null) return null;
-        if (targetType.isAssignableFrom(value.getClass())) return value;
+        if (value == null || targetType.isAssignableFrom(value.getClass())) return value;
         return convertByIntrospection(value, targetType);
     }
 
@@ -221,7 +247,7 @@ public final class TypeConverter {
     private static boolean constructed(Class<?> targetType, Object value, Object[] reference) {
         Constructor<?> constructor = Stream.of(targetType.getConstructors())
                 .filter(c -> Modifier.isPublic(c.getModifiers()) &&
-                        c.getParameters().length == 1 &&
+                        c.getParameterTypes().length == 1 &&
                         ClassUtils.isAssignable(value.getClass(), c.getParameterTypes()[0], true))
                 .findFirst()
                 .orElse(null);
@@ -243,7 +269,7 @@ public final class TypeConverter {
                 .filter(m -> Modifier.isPublic(m.getModifiers()) &&
                         Modifier.isStatic(m.getModifiers()) &&
                         ClassUtils.isAssignable(m.getReturnType(), targetType, true) &&
-                        m.getParameters().length == 1 &&
+                        m.getParameterTypes().length == 1 &&
                         ClassUtils.isAssignable(value.getClass(), m.getParameterTypes()[0], true))
                 .findFirst()
                 .orElse(null);
@@ -265,12 +291,16 @@ public final class TypeConverter {
     }
 
     private static boolean converted(Class<?> targetType, Object value, Object[] reference) {
+        Pattern converterMethodName = Pattern.compile(
+                String.format("^(to|as|get)%s$", targetType.getSimpleName()),
+                Pattern.CASE_INSENSITIVE);
+
         Method converterMethod = Stream.of(value.getClass().getMethods())
                 .filter(m -> Modifier.isPublic(m.getModifiers()) &&
                         !Modifier.isStatic(m.getModifiers()) &&
-                        m.getName().equalsIgnoreCase("to" + targetType.getSimpleName()) &&
+                        converterMethodName.matcher(m.getName()).find() &&
                         m.getReturnType() == targetType &&
-                        m.getParameters().length == 0)
+                        m.getParameterTypes().length == 0)
                 .findFirst()
                 .orElse(null);
 
