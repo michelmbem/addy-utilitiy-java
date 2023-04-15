@@ -4,6 +4,7 @@ import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class StringUtil {
 	private StringUtil() {}
@@ -120,7 +121,7 @@ public final class StringUtil {
 	}
     
     public static <T extends Object> String join(T[] values, CharSequence delimiter) {
-        return Arrays.asList(values).stream()
+        return Stream.of(values)
         		.map(String::valueOf)
                 .collect(Collectors.joining(delimiter));
     }
@@ -134,11 +135,10 @@ public final class StringUtil {
 	public static <T extends Object> String joinCamelCase(T... values) {
         if (values == null || values.length == 0)  return "";
         
-        return camelCase(String.valueOf(values[0])) +
-                Arrays.asList(values).stream()
-                        .skip(1)
-                        .map(o -> pascalCase(String.valueOf(o)))
-                        .collect(Collectors.joining());
+        return camelCase(String.valueOf(values[0])) + Stream.of(values)
+                .skip(1)
+                .map(o -> pascalCase(String.valueOf(o)))
+                .collect(Collectors.joining());
     }
 
 	public static String joinCamelCase(String value, String regex) {
@@ -155,7 +155,7 @@ public final class StringUtil {
             return "";
         }
         else {
-            return Arrays.asList(values).stream()
+            return Stream.of(values)
                     .map(o -> pascalCase(String.valueOf(o)))
                     .collect(Collectors.joining());
         }

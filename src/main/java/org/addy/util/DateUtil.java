@@ -4,9 +4,6 @@ import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Locale;
@@ -314,29 +311,5 @@ public final class DateUtil {
 
 	public static Date parseDate(String value) throws ParseException {
 		return parseDate(value, Locale.getDefault());
-	}
-	
-	public static Date toDate(LocalDateTime localDateTime) {
-		return Date.from(localDateTime.atZone(ZoneId.systemDefault()).toInstant());
-	}
-	
-	public static LocalDateTime toLocalDateTime(Date date) {
-		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-	}
-	
-	public static Date toDate(LocalDate localDate) {
-		return Date.from(localDate.atStartOfDay(ZoneId.systemDefault()).toInstant());
-	}
-	
-	public static LocalDate toLocalDate(Date date) {
-		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-	}
-	
-	public static Date toDate(LocalTime localTime) {
-		return Date.from(localTime.atDate(LocalDate.MIN).atZone(ZoneId.systemDefault()).toInstant());
-	}
-	
-	public static LocalTime toLocalTime(Date date) {
-		return date.toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
 	}
 }

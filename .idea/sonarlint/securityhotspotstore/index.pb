@@ -3,12 +3,6 @@
 	Readme.md,0\c\0c1945d7443c2e154bd3e421c0d438bd4086d8c3
 Y
 )src/main/java/org/addy/util/JRHelper.java,1\f\1f28cc6cac29df3411e222fead33277985415e43
-[
-+src/main/java/org/addy/util/StringUtil.java,f\d\fd59f92cb4781cb5f6fb1418c87fd758455bef04
-Y
-)src/main/java/org/addy/util/DateUtil.java,8\7\875a8dc338b3105c842a52ddf741978c0300704f
-7
-pom.xml,4\4\442292b8a7efeabbe4cc176709b833b1792140ec
 Y
 )src/main/java/org/addy/util/FileUtil.java,e\f\ef381fd9f2c85028ed38588291d1278cf19fdc05
 \
@@ -17,3 +11,5 @@ Y
 -src/test/java/org/addy/util/FileUtilTest.java,5\4\5479c781812f0095e2aea03b11ea7407779d5098
 `
 0src/test/java/org/addy/util/ImageHelperTest.java,f\a\fadd7345360a9ebdce8108a656460ee7054ce84f
+Y
+)src/main/java/org/addy/util/DateUtil.java,8\7\875a8dc338b3105c842a52ddf741978c0300704f
