@@ -22,7 +22,7 @@ public final class TypeConverter {
         if (value instanceof Boolean) return (boolean) value;
         if (value instanceof Number) return ((Number) value).intValue() != 0;
         if (value instanceof CharSequence) return Boolean.parseBoolean(value.toString());
-        return (boolean) convertByIntrospection(value, boolean.class);
+        return convertByIntrospection(value, boolean.class);
     }
 
     public static char toChar(Object value) {
@@ -36,7 +36,7 @@ public final class TypeConverter {
             throw new IllegalArgumentException("The given character sequence is either empty or has more then one character");
         }
 
-        return (char) convertByIntrospection(value, char.class);
+        return convertByIntrospection(value, char.class);
     }
 
     public static byte toByte(Object value) {
@@ -44,7 +44,7 @@ public final class TypeConverter {
         if (value instanceof Boolean) return (byte) ((boolean) value ? 1 : 0);
         if (value instanceof Number) return ((Number) value).byteValue();
         if (value instanceof CharSequence) return Byte.parseByte(value.toString());
-        return (byte) convertByIntrospection(value, byte.class);
+        return convertByIntrospection(value, byte.class);
     }
 
     public static short toShort(Object value) {
@@ -52,7 +52,7 @@ public final class TypeConverter {
         if (value instanceof Boolean) return (short) ((boolean) value ? 1 : 0);
         if (value instanceof Number) return ((Number) value).shortValue();
         if (value instanceof CharSequence) return Short.parseShort(value.toString());
-        return (short) convertByIntrospection(value, short.class);
+        return convertByIntrospection(value, short.class);
     }
 
     public static int toInt(Object value) {
@@ -60,7 +60,7 @@ public final class TypeConverter {
         if (value instanceof Boolean) return (boolean) value ? 1 : 0;
         if (value instanceof Number) return ((Number) value).intValue();
         if (value instanceof CharSequence) return Integer.parseInt(value.toString());
-        return (int) convertByIntrospection(value, int.class);
+        return convertByIntrospection(value, int.class);
     }
 
     public static long toLong(Object value) {
@@ -68,7 +68,7 @@ public final class TypeConverter {
         if (value instanceof Boolean) return (boolean) value ? 1L : 0L;
         if (value instanceof Number) return ((Number) value).longValue();
         if (value instanceof CharSequence) return Long.parseLong(value.toString());
-        return (long) convertByIntrospection(value, long.class);
+        return convertByIntrospection(value, long.class);
     }
 
     public static float toFloat(Object value) {
@@ -76,7 +76,7 @@ public final class TypeConverter {
         if (value instanceof Boolean) return (boolean) value ? 1F : 0F;
         if (value instanceof Number) return ((Number) value).floatValue();
         if (value instanceof CharSequence) return Float.parseFloat(value.toString());
-        return (float) convertByIntrospection(value, float.class);
+        return convertByIntrospection(value, float.class);
     }
 
     public static double toDouble(Object value) {
@@ -84,19 +84,19 @@ public final class TypeConverter {
         if (value instanceof Boolean) return (boolean) value ? 1.0 : 0.0;
         if (value instanceof Number) return ((Number) value).doubleValue();
         if (value instanceof CharSequence) return Double.parseDouble(value.toString());
-        return (double) convertByIntrospection(value, double.class);
+        return convertByIntrospection(value, double.class);
     }
 
     public static BigInteger toBigInteger(Object value) {
         if (value == null || value instanceof BigInteger) return (BigInteger) value;
         if (value instanceof Boolean) return (boolean) value ? BigInteger.ONE : BigInteger.ZERO;
-        return (BigInteger) convertByIntrospection(value, BigInteger.class);
+        return convertByIntrospection(value, BigInteger.class);
     }
 
     public static BigDecimal toBigDecimal(Object value) {
         if (value == null || value instanceof BigDecimal) return (BigDecimal) value;
         if (value instanceof Boolean) return (boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
-        return (BigDecimal) convertByIntrospection(value, BigDecimal.class);
+        return convertByIntrospection(value, BigDecimal.class);
     }
 
     public static Date toDate(Object value) {
@@ -128,7 +128,7 @@ public final class TypeConverter {
             }
         }
 
-        return (Date) convertByIntrospection(value, Date.class);
+        return convertByIntrospection(value, Date.class);
     }
 
     public static ZonedDateTime toZonedDateTime(Object value) {
@@ -149,7 +149,7 @@ public final class TypeConverter {
         if (value instanceof Date)
             return ((Date) value).toInstant().atZone(ZoneId.systemDefault());
 
-        return (ZonedDateTime) convertByIntrospection(value, ZonedDateTime.class);
+        return convertByIntrospection(value, ZonedDateTime.class);
     }
 
     public static OffsetDateTime toOffsetDateTime(Object value) {
@@ -170,7 +170,7 @@ public final class TypeConverter {
         if (value instanceof Date)
             return ((Date) value).toInstant().atOffset((ZoneOffset) ZoneId.systemDefault());
 
-        return (OffsetDateTime) convertByIntrospection(value, OffsetDateTime.class);
+        return convertByIntrospection(value, OffsetDateTime.class);
     }
 
     public static LocalDateTime toLocalDateTime(Object value) {
@@ -181,7 +181,7 @@ public final class TypeConverter {
         if (value instanceof Date)
             return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
 
-        return (LocalDateTime) convertByIntrospection(value, LocalDateTime.class);
+        return convertByIntrospection(value, LocalDateTime.class);
     }
 
     public static LocalDate toLocalDate(Object value) {
@@ -190,7 +190,7 @@ public final class TypeConverter {
         if (value instanceof Date)
             return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
 
-        return (LocalDate) convertByIntrospection(value, LocalDate.class);
+        return convertByIntrospection(value, LocalDate.class);
     }
 
     public static OffsetTime toOffsetTime(Object value) {
@@ -199,7 +199,7 @@ public final class TypeConverter {
         if (value instanceof Date)
             return ((Date) value).toInstant().atOffset((ZoneOffset) ZoneId.systemDefault()).toOffsetTime();
 
-        return (OffsetTime) convertByIntrospection(value, OffsetTime.class);
+        return convertByIntrospection(value, OffsetTime.class);
     }
 
     public static LocalTime toLocalTime(Object value) {
@@ -208,7 +208,7 @@ public final class TypeConverter {
         if (value instanceof Date)
             return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
 
-        return (LocalTime) convertByIntrospection(value, LocalTime.class);
+        return convertByIntrospection(value, LocalTime.class);
     }
 
     public static Object toType(Object value, Class<?> targetType) {
@@ -233,18 +233,18 @@ public final class TypeConverter {
         return convertByIntrospection(value, targetType);
     }
 
-    private static Object convertByIntrospection(Object value, Class<?> targetType) {
-        Object[] reference = new Object[1];
+    private static <T> T convertByIntrospection(Object value, Class<T> targetType) {
+        Reference<T> ref = new Reference<>();
 
-        if (constructed(targetType, value, reference) ||
-                factored(targetType, value, reference) ||
-                parsed(targetType, value, reference) ||
-                converted(targetType, value, reference)) return reference[0];
+        if (constructed(targetType, value, ref) ||
+                factored(targetType, value, ref) ||
+                parsed(targetType, value, ref) ||
+                converted(targetType, value, ref)) return ref.getTarget();
 
         throw new ClassCastException("Could not cast " + value + " to " + targetType);
     }
 
-    private static boolean constructed(Class<?> targetType, Object value, Object[] reference) {
+    private static <T> boolean constructed(Class<T> targetType, Object value, Reference<T> ref) {
         Constructor<?> constructor = Stream.of(targetType.getConstructors())
                 .filter(c -> Modifier.isPublic(c.getModifiers()) &&
                         c.getParameterTypes().length == 1 &&
@@ -254,7 +254,7 @@ public final class TypeConverter {
 
         if (constructor != null) {
             try {
-                reference[0] = constructor.newInstance(value);
+                ref.setTarget((T) constructor.newInstance(value));
                 return true;
             } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
                 return false;
@@ -264,7 +264,7 @@ public final class TypeConverter {
         return false;
     }
 
-    private static boolean factored(Class<?> targetType, Object value, Object[] reference) {
+    private static <T> boolean factored(Class<T> targetType, Object value, Reference<T> ref) {
         Method factoryMethod = Stream.of(targetType.getMethods())
                 .filter(m -> Modifier.isPublic(m.getModifiers()) &&
                         Modifier.isStatic(m.getModifiers()) &&
@@ -276,7 +276,7 @@ public final class TypeConverter {
 
         if (factoryMethod != null) {
             try {
-                reference[0] = factoryMethod.invoke(null, value);
+                ref.setTarget((T) factoryMethod.invoke(null, value));
                 return true;
             } catch (IllegalAccessException | InvocationTargetException ignored) {
                 return false;
@@ -286,11 +286,11 @@ public final class TypeConverter {
         return false;
     }
 
-    private static boolean parsed(Class<?> targetType, Object value, Object[] reference) {
-        return (value instanceof CharSequence) && factored(targetType, value.toString(), reference);
+    private static <T> boolean parsed(Class<T> targetType, Object value, Reference<T> ref) {
+        return (value instanceof CharSequence) && factored(targetType, value.toString(), ref);
     }
 
-    private static boolean converted(Class<?> targetType, Object value, Object[] reference) {
+    private static <T> boolean converted(Class<T> targetType, Object value, Reference<T> ref) {
         Pattern converterMethodName = Pattern.compile(
                 String.format("^(to|as|get)%s$", targetType.getSimpleName()),
                 Pattern.CASE_INSENSITIVE);
@@ -306,7 +306,7 @@ public final class TypeConverter {
 
         if (converterMethod != null) {
             try {
-                reference[0] = converterMethod.invoke(value);
+                ref.setTarget((T) converterMethod.invoke(value));
                 return true;
             } catch (IllegalAccessException | InvocationTargetException ignored) {
                 return false;
