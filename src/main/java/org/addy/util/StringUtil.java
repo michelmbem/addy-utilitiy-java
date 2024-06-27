@@ -1,6 +1,5 @@
 package org.addy.util;
 
-import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -151,14 +150,11 @@ public final class StringUtil {
     
     @SafeVarargs
 	public static <T extends Object> String joinPascalCase(T... values) {
-        if (values == null || values.length == 0) {
-            return "";
-        }
-        else {
-            return Stream.of(values)
-                    .map(o -> pascalCase(String.valueOf(o)))
-                    .collect(Collectors.joining());
-        }
+        if (values == null || values.length == 0) return "";
+        
+        return Stream.of(values)
+                .map(o -> pascalCase(String.valueOf(o)))
+                .collect(Collectors.joining());
     }
 
 	public static String joinPascalCase(String value, String regex) {

@@ -347,22 +347,20 @@ public final class FileUtil {
 	
 	///////////////// INNER CLASSES AND INTERFACES ///////////////////
 	
+	@FunctionalInterface
 	public interface LineConsumer {
 		void consume(String line);
 	}
 	
+	@FunctionalInterface
 	public interface TreeWalker {
-		boolean beforeEnteringDirectory(File node);
 		void onLeaf(File node);
-		void afterExitingDirectory(File node);
-	}
-	
-	public abstract static class AbstractTreeWalker implements TreeWalker {
-		public boolean beforeEnteringDirectory(File node) {
+
+		default boolean beforeEnteringDirectory(File node) {
 			return true;
 		}
 
-		public void afterExitingDirectory(File node) {
+		default void afterExitingDirectory(File node) {
 		}
 	}
 	
@@ -375,7 +373,7 @@ public final class FileUtil {
 		}
 		
 		public PatternFilter(String pattern) {
-			this.pattern = Pattern.compile(pattern);
+			this(Pattern.compile(pattern));
 		}
 
 		@Override
@@ -398,7 +396,7 @@ public final class FileUtil {
 		}
 		
 		public ExtensionFilter(String extensions) {
-			this.extensions = extensions.split("\\s*,\\s*");
+			this(extensions.split("\\s*,\\s*"));
 		}
 
 		@Override
@@ -431,8 +429,7 @@ public final class FileUtil {
 		}
 		
 		public ContentTypeFilter(String contentTypes) {
-			this.contentTypes = contentTypes.split("\\s*,\\s*");
-			initPatterns();
+			this(contentTypes.split("\\s*,\\s*"));
 		}
 
 		@Override

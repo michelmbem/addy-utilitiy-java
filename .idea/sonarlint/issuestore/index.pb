@@ -13,3 +13,15 @@ Y
 0src/test/java/org/addy/util/ImageHelperTest.java,f\a\fadd7345360a9ebdce8108a656460ee7054ce84f
 Y
 )src/main/java/org/addy/util/DateUtil.java,8\7\875a8dc338b3105c842a52ddf741978c0300704f
+Z
+*src/main/java/org/addy/util/Reference.java,7\0\7087346fc640c200ea353ab843bd8962381c19a3
+[
++src/main/java/org/addy/util/StringUtil.java,f\d\fd59f92cb4781cb5f6fb1418c87fd758455bef04
+b
+2src/test/java/org/addy/util/TypeConverterTest.java,9\4\94569d13d7c33060925448cf72507d64018ed917
+_
+/src/main/java/org/addy/util/CollectionUtil.java,1\e\1ec91c431309a1fe944a8cc65add4f2028034fc2
+7
+pom.xml,4\4\442292b8a7efeabbe4cc176709b833b1792140ec
+^
+.src/main/java/org/addy/util/TypeConverter.java,d\8\d832546c5c074a7ccd335273c20b716e20a3bf28
