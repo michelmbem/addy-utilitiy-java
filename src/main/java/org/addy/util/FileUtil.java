@@ -60,7 +60,7 @@ public final class FileUtil {
 		if (fileName != null) {
 			int lastDot = fileName.lastIndexOf(".");
 			if (lastDot > fileName.lastIndexOf(File.separator)) {
-				return String.valueOf(fileName.substring(0, lastDot)) + newExtension;
+				return fileName.substring(0, lastDot) + newExtension;
 			}
 		}
 		return fileName;
@@ -121,7 +121,7 @@ public final class FileUtil {
 			destFile = new File(destFile, sourceFile.getName());
 
 		if (sourceFile.isDirectory()) {
-			if (!destFile.isDirectory() && !destFile.mkdirs())
+			if (!(destFile.isDirectory() || destFile.mkdirs()))
 				return false;
 
 			for (File childFile : sourceFile.listFiles()) {
@@ -133,9 +133,8 @@ public final class FileUtil {
 		}
 
 		File destDir = destFile.getParentFile();
-		if (!destDir.isDirectory() && !destDir.mkdirs()) {
+		if (!(destDir.isDirectory() || destDir.mkdirs()))
 			return false;
-		}
 		
 		try (InputStream input = new FileInputStream(sourceFile)) {
 			try (OutputStream output = new FileOutputStream(destFile)) {
@@ -258,7 +257,7 @@ public final class FileUtil {
         		lines.add(line);
         }
 		
-		return lines.toArray(new String[] {});
+		return lines.toArray(String[]::new);
     }
 	
 	public static String[] readAllLines(File file) throws IOException {

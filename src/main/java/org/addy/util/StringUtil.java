@@ -1,5 +1,6 @@
 package org.addy.util;
 
+import java.text.Normalizer;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -8,104 +9,74 @@ import java.util.stream.Stream;
 public final class StringUtil {
 	private StringUtil() {}
 	
-	public static final char DEFAULT_QUOTE = '\'';
-	public static final char DEFAULT_PAD_CHAR = ' ';
-	public static final String DEFAULT_DELIMITER = ",";
+	public static final char DEFAULT_PADDING_CHAR = ' ';
+    public static final String DEFAULT_CONTAINER = "'";
+    public static final String DEFAULT_DELIMITER = "";
 	public static final String DEFAULT_SPLIT_REGEX = "[\\W_]+";
-	
 	private static final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-	private static final String ACCENTS = "ÀÁÂÃÄÅÇÈÉÊËÌÍÎÏÒÓÔÕÖÙÚÛÜÝàáâãäåçèéêëìíîïðòóôõöùúûüýÿ";
-    private static final String NO_ACCENT = "AAAAAACEEEEIIIIOOOOOUUUUYaaaaaaceeeeiiiioooooouuuuyy";
-    private static final String ACCEPTED_SPECIAL_CHARS = ".-_";
-    
-	public static String quote(String value, char quoteChar) {
-		String quoteString = String.valueOf(quoteChar);
-		String doubleQuote = quoteString + quoteString;
-		return value == null
-				? doubleQuote
-				: quoteString + value.replace(quoteString, doubleQuote) + quoteString;
-	}
-
-	public static String quote(String value) {
-		return quote(value, DEFAULT_QUOTE);
-	}
-	
-    public static String unquote(String value, char quoteChar) {
-        if (null == value) return null;
-        
-        value = value.trim();
-        int length = value.length();
-        
-        if (length < 2 || value.charAt(0) != quoteChar ||
-    		value.charAt(length - 1) != quoteChar) return value;
-    
-        StringBuilder sb = new StringBuilder();
-        boolean allowQuote = false;
-        
-        for (int i = 1; i < length - 1; ++i) {
-            char c = value.charAt(i);
-            if (c == quoteChar) {
-                if (allowQuote) {
-                    sb.append(quoteChar);
-                    allowQuote = false;
-                }
-                else {
-                    allowQuote = true;
-                }
-            }
-            else if (allowQuote) {
-                sb.append(quoteChar).append(c);
-                allowQuote = false;
-            }
-            else {
-                sb.append(c);
-            }
-        }
-        
-        if (allowQuote) sb.append(quoteChar);
-        
-        return sb.toString();
-    }
-
-    public static String unquote(String value) {
-        return unquote(value, DEFAULT_QUOTE);
-    }
 
 	public static boolean isEmpty(String value) {
-		return value == null || value.length() == 0;
+		return value == null || value.isEmpty();
 	}
 
 	public static boolean isBlank(String value) {
-		return value == null || value.matches("^\\s*$");
+		return value == null || value.isBlank();
 	}
 
-	public static String padLeft(String value, int length, char padChar) {
-		StringBuilder sb = new StringBuilder(value);
+	public static String padLeft(String value, int length, char paddingChar) {
+        StringBuilder sb = new StringBuilder(value);
 
 		while (sb.length() < length) {
-			sb.insert(0, padChar);
+			sb.insert(0, paddingChar);
 		}
 
 		return sb.toString();
 	}
 
 	public static String padLeft(String value, int length) {
-		return padLeft(value, length, DEFAULT_PAD_CHAR);
+		return padLeft(value, length, DEFAULT_PADDING_CHAR);
 	}
 
-	public static String padRight(String value, int length, char padChar) {
+	public static String padRight(String value, int length, char paddingChar) {
 		StringBuilder sb = new StringBuilder(value);
 
 		while (sb.length() < length) {
-			sb.append(padChar);
+			sb.append(paddingChar);
 		}
 
 		return sb.toString();
 	}
 
 	public static String padRight(String value, int length) {
-		return padRight(value, length, DEFAULT_PAD_CHAR);
+		return padRight(value, length, DEFAULT_PADDING_CHAR);
 	}
+
+    public static String wrap(String value, String container) {
+        return value == null
+                ? null
+                : container + value.replace(container, container + container) + container;
+    }
+
+    public static String wrap(String value) {
+        return wrap(value, DEFAULT_CONTAINER);
+    }
+
+    public static String unwrap(String value, String container) {
+        if (null == value) return null;
+
+        value = value.trim();
+
+        if (!(value.length() >= 2 * container.length() &&
+                value.startsWith(container) &&
+                value.endsWith(container))) return value;
+
+        return value.substring(container.length(), value.length() - container.length())
+                .replace(container + container, container);
+    }
+
+    public static String unwrap(String value) {
+        return unwrap(value, DEFAULT_CONTAINER);
+    }
 
 	public static String camelCase(String value) {
 		return isEmpty(value)
@@ -119,19 +90,19 @@ public final class StringUtil {
 				: value.substring(0, 1).toUpperCase() + value.substring(1);
 	}
     
-    public static <T extends Object> String join(T[] values, CharSequence delimiter) {
+    public static <T> String join(T[] values, CharSequence delimiter) {
         return Stream.of(values)
         		.map(String::valueOf)
                 .collect(Collectors.joining(delimiter));
     }
     
     @SafeVarargs
-	public static <T extends Object> String join(T... values) {
+	public static <T> String join(T... values) {
         return join(values, DEFAULT_DELIMITER);
     }
     
     @SafeVarargs
-	public static <T extends Object> String joinCamelCase(T... values) {
+	public static <T> String joinCamelCase(T... values) {
         if (values == null || values.length == 0)  return "";
         
         return camelCase(String.valueOf(values[0])) + Stream.of(values)
@@ -139,17 +110,9 @@ public final class StringUtil {
                 .map(o -> pascalCase(String.valueOf(o)))
                 .collect(Collectors.joining());
     }
-
-	public static String joinCamelCase(String value, String regex) {
-		return joinCamelCase(value.split(regex));
-	}
-
-	public static String joinCamelCase(String value) {
-		return joinCamelCase(value, DEFAULT_SPLIT_REGEX);
-	}
     
     @SafeVarargs
-	public static <T extends Object> String joinPascalCase(T... values) {
+	public static <T> String joinPascalCase(T... values) {
         if (values == null || values.length == 0) return "";
         
         return Stream.of(values)
@@ -157,12 +120,20 @@ public final class StringUtil {
                 .collect(Collectors.joining());
     }
 
-	public static String joinPascalCase(String value, String regex) {
+    public static String splitJoinCamelCase(String value, String regex) {
+        return joinCamelCase(value.split(regex));
+    }
+
+    public static String splitJoinCamelCase(String value) {
+        return splitJoinCamelCase(value, DEFAULT_SPLIT_REGEX);
+    }
+
+	public static String splitJoinPascalCase(String value, String regex) {
 		return joinPascalCase(value.split(regex));
 	}
 
-	public static String joinPascalCase(String value) {
-		return joinPascalCase(value, DEFAULT_SPLIT_REGEX);
+	public static String splitJoinPascalCase(String value) {
+		return splitJoinPascalCase(value, DEFAULT_SPLIT_REGEX);
 	}
 
 	public static String reverseCase(String value) {
@@ -182,43 +153,11 @@ public final class StringUtil {
 
 		return sb.toString();
 	}
-	
-    public static String repeat(String value, int times) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < times; ++i) {
-            sb.append(value);
-        }
-        return sb.toString();
-    }
 
-    public static String noAccent(String value) {
-        if (null == value || value.trim().length() == 0) return "";
-        
-        value = value.replaceAll("\\s*-\\s*", "-");
-        
-        StringBuilder sb = new StringBuilder();
-        int length = value.length();
-        boolean whitespace = false;
-        
-        for (int i = 0; i < length; ++i) {
-            char c = value.charAt(i);
-            int pos = ACCENTS.indexOf(c);
-            
-            if (pos >= 0) {
-                sb.append(NO_ACCENT.charAt(pos));
-                whitespace = false;
-            }
-            else if (Character.isLetterOrDigit(c) || ACCEPTED_SPECIAL_CHARS.indexOf(c) >= 0) {
-                sb.append(c);
-                whitespace = false;
-            }
-            else if (Character.isWhitespace(c) && !whitespace) {
-                sb.append('-');
-                whitespace = true;
-            }
-        }
-        
-        return sb.toString();
+    public static String removeAccents(String value) {
+        return value == null
+                ? null
+                : Normalizer.normalize(value, Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
     }
     
     public static String randomString(int length) {

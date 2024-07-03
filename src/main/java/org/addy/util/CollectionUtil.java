@@ -23,11 +23,11 @@ public final class CollectionUtil {
     }
 
     public static <T> T requiredFirst(Collection<T> collection) {
-        return collection.stream().findFirst().orElseThrow();
+        return first(collection).orElseThrow();
     }
 
     public static <T> T requiredFirst(T[] array) {
-        return Stream.of(array).findFirst().orElseThrow();
+        return first(array).orElseThrow();
     }
 
     public static <T> List<T> toList(Collection<T> collection) {
