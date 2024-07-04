@@ -62,27 +62,33 @@ public final class FileUtil {
 			if (lastDot > fileName.lastIndexOf(File.separator)) {
 				return fileName.substring(0, lastDot) + newExtension;
 			}
+			return fileName + newExtension;
 		}
-		return fileName;
+		return null;
 	}
 	
 	public static String getContentType(File file) throws IOException {
         String contentType = Files.probeContentType(file.toPath());
-        if (contentType == null) {
-            switch (getExtension(file.getPath())) {
-                case ".json":
-                    return "application/json";
-                case ".jsonp":
-                    return "application/javascript";
-                default:
-                    return "application/octet-stream";
-            }
+        if (contentType == null && file.isFile()) {
+            return switch (getExtension(file.getPath())) {
+                case ".json" -> "application/json";
+                case ".jsonp" -> "application/javascript";
+                default -> "application/octet-stream";
+            };
         }
         return contentType;
     }
 
-	public static String combine(String path1, String path2) {
-		return (new File(new File(path1), path2)).getPath();
+	public static String getContentType(String fileName) throws IOException {
+		return getContentType(new File(fileName));
+	}
+
+	public static String combine(String root, String firstChild, String... moreChildren) {
+		File combined = new File(root, firstChild);
+		for (String child : moreChildren) {
+			combined = new File(combined, child);
+		}
+		return combined.getPath();
 	}
 
 	public static String getUserDir() {
@@ -176,6 +182,10 @@ public final class FileUtil {
 		} else {
 			treeWalker.onLeaf(rootNode);
 		}
+	}
+
+	public static void walkTree(String rootPath, FileFilter filter, TreeWalker treeWalker) {
+		walkTree(new File(rootPath), filter, treeWalker);
 	}
 
 	public static InputStream open(String path) throws FileNotFoundException {
