@@ -182,7 +182,7 @@ public final class DateUtil {
 	}
 
 	public static Date getLastSecondOfDay(Date date) {
-		return addSeconds(getDate(date), SECONDS_PER_DAY);
+		return addSeconds(getDate(date), SECONDS_PER_DAY - 1);
 	}
 
 	public static Date getAverrageDate(Date... dates) {

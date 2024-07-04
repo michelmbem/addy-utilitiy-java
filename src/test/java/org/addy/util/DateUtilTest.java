@@ -74,4 +74,41 @@ class DateUtilTest {
         Date dateTime = DateUtil.combine(date, time);
         assertEquals("20240229142740", DATE_TIME_FORMAT.format(dateTime));
     }
+
+    @Test
+    void getLastDayOfMonthWorks() {
+        assertEquals(31, DateUtil.getLastDayOfMonth(1, 1990));
+        assertEquals(28, DateUtil.getLastDayOfMonth(2, 1995));
+        assertEquals(30, DateUtil.getLastDayOfMonth(6, 2010));
+        assertEquals(29, DateUtil.getLastDayOfMonth(2, 2024));
+    }
+
+    @Test
+    void getLastSecondOfDayWorks() {
+        Date date = DateUtil.date(2024, 2, 29);
+        Date dateTime = DateUtil.getLastSecondOfDay(date);
+        assertEquals("20240229235959", DATE_TIME_FORMAT.format(dateTime));
+    }
+
+    @Test
+    void getAverrageDateWorks() {
+        Date avgDate = DateUtil.getAverrageDate(
+                DateUtil.date(2020, 3, 2),
+                DateUtil.date(2021, 3, 2),
+                DateUtil.date(2022, 3, 2),
+                DateUtil.date(2023, 3, 2),
+                DateUtil.date(2024, 3, 2));
+        Date expected = DateUtil.date(2022, 3, 2);
+
+        assertEquals(expected, DateUtil.getDate(avgDate));
+    }
+
+    @Test
+    void dateDifferenceWorks() {
+        Date date1 = DateUtil.date(2020, 3, 2);
+        Date date2 = DateUtil.date(2024, 7, 3);
+        assertEquals(4, DateUtil.getYearsBetween(date1, date2));
+        assertEquals(52, DateUtil.getMonthsBetween(date1, date2));
+        assertEquals(1583, DateUtil.getDaysBetween(date1, date2));
+    }
 }
