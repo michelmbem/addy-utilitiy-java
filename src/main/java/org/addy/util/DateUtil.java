@@ -257,34 +257,76 @@ public final class DateUtil {
 		return calendar;
 	}
 
+	public static String toLongDateTimeString(Date date, Locale locale) {
+		return DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale).format(date);
+	}
+
 	public static String toLongDateTimeString(Date date) {
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG);
-		return dateFormat.format(date);
+		return toLongDateTimeString(date, Locale.getDefault());
+	}
+
+	public static String toMediumDateTimeString(Date date, Locale locale) {
+		return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(date);
+	}
+
+	public static String toMediumDateTimeString(Date date) {
+		return toMediumDateTimeString(date, Locale.getDefault());
+	}
+
+	public static String toShortDateTimeString(Date date, Locale locale) {
+		return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date);
 	}
 
 	public static String toShortDateTimeString(Date date) {
-		DateFormat dateFormat = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.LONG);
-		return dateFormat.format(date);
+		return toShortDateTimeString(date, Locale.getDefault());
+	}
+
+	public static String toLongDateString(Date date, Locale locale) {
+		return DateFormat.getDateInstance(DateFormat.LONG).format(date);
 	}
 
 	public static String toLongDateString(Date date) {
-		DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.LONG);
-		return dateFormat.format(date);
+		return toLongDateString(date, Locale.getDefault());
+	}
+
+	public static String toMediumDateString(Date date, Locale locale) {
+		return DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
+	}
+
+	public static String toMediumDateString(Date date) {
+		return toMediumDateString(date, Locale.getDefault());
+	}
+
+	public static String toShortDateString(Date date, Locale locale) {
+		return DateFormat.getDateInstance(DateFormat.SHORT).format(date);
 	}
 
 	public static String toShortDateString(Date date) {
-		DateFormat dateFormat = DateFormat.getDateInstance(DateFormat.SHORT);
-		return dateFormat.format(date);
+		return toShortDateString(date, Locale.getDefault());
 	}
 
-	public static String toTimeString(Date date) {
-		DateFormat dateFormat = DateFormat.getTimeInstance(DateFormat.LONG);
-		return dateFormat.format(date);
+	public static String toLongTimeString(Date date, Locale locale) {
+		return DateFormat.getTimeInstance(DateFormat.LONG).format(date);
+	}
+
+	public static String toLongTimeString(Date date) {
+		return toLongTimeString(date, Locale.getDefault());
+	}
+
+	public static String toShortTimeString(Date date, Locale locale) {
+		return DateFormat.getTimeInstance(DateFormat.SHORT).format(date);
+	}
+
+	public static String toShortTimeString(Date date) {
+		return toShortTimeString(date, Locale.getDefault());
+	}
+
+	public static String toString(Date date, String format, Locale locale) {
+		return new SimpleDateFormat(format, locale).format(date);
 	}
 
 	public static String toString(Date date, String format) {
-		SimpleDateFormat sdf = new SimpleDateFormat(format);
-		return sdf.format(date);
+		return toString(date, format, Locale.getDefault());
 	}
 
 	public static Date parseDate(String value, Locale locale) throws ParseException {

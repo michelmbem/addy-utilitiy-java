@@ -2,8 +2,10 @@ package org.addy.util;
 
 import org.junit.jupiter.api.Test;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -110,5 +112,27 @@ class DateUtilTest {
         assertEquals(4, DateUtil.getYearsBetween(date1, date2));
         assertEquals(52, DateUtil.getMonthsBetween(date1, date2));
         assertEquals(1583, DateUtil.getDaysBetween(date1, date2));
+    }
+
+    @Test
+    void stringConversionWorks() {
+        Date date = DateUtil.dateTime(2024, 7, 3, 22, 15, 30);
+        assertTrue(DateUtil.toLongDateTimeString(date).contains("3 juillet 2024"));
+        assertTrue(DateUtil.toLongDateTimeString(date).contains("22 h 15 min 30 s"));
+        assertEquals("3 juill. 2024, 22 h 15 min 30 s", DateUtil.toMediumDateTimeString(date));
+        assertEquals("2024-07-03 22 h 15", DateUtil.toShortDateTimeString(date));
+        assertEquals("3 juillet 2024", DateUtil.toLongDateString(date));
+        assertEquals("3 juill. 2024", DateUtil.toMediumDateString(date));
+        assertEquals("2024-07-03", DateUtil.toShortDateString(date));
+        assertTrue(DateUtil.toLongTimeString(date).contains("22 h 15 min 30 s"));
+        assertEquals("22 h 15", DateUtil.toShortTimeString(date));
+        assertEquals("03/07/2024 22:15:30", DateUtil.toString(date, "dd/MM/yyyy HH:mm:ss"));
+    }
+
+    @Test
+    void stringParsingWorks() throws ParseException {
+        Date date = DateUtil.date(2002, 2, 19);
+        assertEquals(date, DateUtil.parseDate("2002-02-19"));
+        assertEquals(date, DateUtil.parseDate("19/02/2002", Locale.FRANCE));
     }
 }
