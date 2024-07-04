@@ -117,22 +117,21 @@ class DateUtilTest {
     @Test
     void stringConversionWorks() {
         Date date = DateUtil.dateTime(2024, 7, 3, 22, 15, 30);
-        assertTrue(DateUtil.toLongDateTimeString(date).contains("3 juillet 2024"));
-        assertTrue(DateUtil.toLongDateTimeString(date).contains("22 h 15 min 30 s"));
-        assertEquals("3 juill. 2024, 22 h 15 min 30 s", DateUtil.toMediumDateTimeString(date));
-        assertEquals("2024-07-03 22 h 15", DateUtil.toShortDateTimeString(date));
-        assertEquals("3 juillet 2024", DateUtil.toLongDateString(date));
-        assertEquals("3 juill. 2024", DateUtil.toMediumDateString(date));
-        assertEquals("2024-07-03", DateUtil.toShortDateString(date));
-        assertTrue(DateUtil.toLongTimeString(date).contains("22 h 15 min 30 s"));
-        assertEquals("22 h 15", DateUtil.toShortTimeString(date));
+        assertEquals("July 3, 2024 at 10:15:30 PM EDT", DateUtil.toLongDateTimeString(date, Locale.US));
+        assertEquals("3 juill. 2024, 22 h 15 min 30 s", DateUtil.toMediumDateTimeString(date, Locale.CANADA_FRENCH));
+        assertEquals("2024-07-03 22 h 15", DateUtil.toShortDateTimeString(date, Locale.US));
+        assertEquals("3 juillet 2024", DateUtil.toLongDateString(date, Locale.FRANCE));
+        assertEquals("3 juill. 2024", DateUtil.toMediumDateString(date, Locale.CANADA_FRENCH));
+        assertEquals("2024-07-03", DateUtil.toShortDateString(date, Locale.US));
+        assertEquals("22 h 15 min 30 s HAE", DateUtil.toLongTimeString(date, Locale.FRANCE));
+        assertEquals("22 h 15", DateUtil.toShortTimeString(date, Locale.US));
         assertEquals("03/07/2024 22:15:30", DateUtil.toString(date, "dd/MM/yyyy HH:mm:ss"));
     }
 
     @Test
     void stringParsingWorks() throws ParseException {
         Date date = DateUtil.date(2002, 2, 19);
-        assertEquals(date, DateUtil.parseDate("2002-02-19"));
+        assertEquals(date, DateUtil.parseDate("2002-02-19", Locale.CANADA_FRENCH));
         assertEquals(date, DateUtil.parseDate("19/02/2002", Locale.FRANCE));
     }
 }
