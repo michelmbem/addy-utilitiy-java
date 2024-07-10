@@ -358,4 +358,12 @@ public final class DateUtil {
 	public static Date parseDate(String value) throws ParseException {
 		return parseDate(value, Locale.getDefault());
 	}
+
+	public static Date parseDate(String value, String format, Locale locale) throws ParseException {
+		return new SimpleDateFormat(format, locale).parse(value);
+	}
+
+	public static Date parseDate(String value, String format) throws ParseException {
+		return parseDate(value, format, Locale.getDefault());
+	}
 }
