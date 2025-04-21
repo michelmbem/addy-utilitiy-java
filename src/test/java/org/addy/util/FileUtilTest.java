@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -137,13 +138,13 @@ class FileUtilTest {
 	@Test
 	void deleteDotGitAndDotVSDirs() {
 		List<String> fileList = new LinkedList<>();
+		var dirToDelete = Set.of(".git", ".vs", "bin", "obj", "Debug", "Release", "Win32", "x64");
 		var codeDir = new File("C:\\Users\\mbem_\\source\\local");
 		var cleaner = new FileUtil.TreeWalker() {
 
 			@Override
 			public boolean beforeEnteringDirectory(File node) {
-				if (node.isDirectory() &&
-						(node.getName().equals(".vs") || node.getName().equals(".git"))) {
+				if (node.isDirectory() && dirToDelete.contains(node.getName())) {
 					FileUtil.delete(node);
 					fileList.add(node.getPath());
 					return false;
