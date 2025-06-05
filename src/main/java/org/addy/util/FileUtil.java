@@ -374,7 +374,6 @@ public final class FileUtil {
 	}
 	
 	public static class PatternFilter implements FileFilter {
-		
 		private final Pattern pattern;
 		
 		public PatternFilter(Pattern pattern) {
@@ -390,14 +389,12 @@ public final class FileUtil {
 			return pattern.matcher(file.getPath()).matches();
 		}
 
-		public Pattern getPattern() {
+		public final Pattern getPattern() {
 			return pattern;
 		}
-		
 	}
 	
 	public static class ExtensionFilter implements FileFilter {
-		
 		private final String[] extensions;
 		
 		public ExtensionFilter(String[] extensions) {
@@ -421,14 +418,12 @@ public final class FileUtil {
 			return false;
 		}
 
-		public String[] getExtensions() {
+		public final String[] getExtensions() {
 			return extensions;
 		}
-		
 	}
 	
 	public static class ContentTypeFilter implements FileFilter {
-		
 		private final String[] contentTypes;
 		private Pattern[] patterns;
 		
@@ -458,7 +453,7 @@ public final class FileUtil {
 			return false;
 		}
 
-		public String[] getContentTypes() {
+		public final String[] getContentTypes() {
 			return contentTypes;
 		}
 		
@@ -469,6 +464,5 @@ public final class FileUtil {
 				patterns[i] = Pattern.compile(regex);
 			}
 		}
-		
 	}
 }
