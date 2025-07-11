@@ -9,8 +9,8 @@ import java.util.stream.Stream;
 public final class StringUtil {
 	private StringUtil() {}
 	
-	public static final char DEFAULT_PADDING_CHAR = ' ';
-    public static final String DEFAULT_CONTAINER = "'";
+	public static final char DEFAULT_PADDING = ' ';
+    public static final String DEFAULT_WRAPPER = "'";
     public static final String DEFAULT_DELIMITER = "";
 	public static final String DEFAULT_SPLIT_REGEX = "[\\W_]+";
 	private static final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
@@ -23,59 +23,59 @@ public final class StringUtil {
 		return value == null || value.isBlank();
 	}
 
-	public static String padLeft(String value, int length, char paddingChar) {
-        StringBuilder sb = new StringBuilder(value);
+	public static String padLeft(String value, int length, char padding) {
+        var sb = new StringBuilder(value);
 
 		while (sb.length() < length) {
-			sb.insert(0, paddingChar);
+			sb.insert(0, padding);
 		}
 
 		return sb.toString();
 	}
 
 	public static String padLeft(String value, int length) {
-		return padLeft(value, length, DEFAULT_PADDING_CHAR);
+		return padLeft(value, length, DEFAULT_PADDING);
 	}
 
-	public static String padRight(String value, int length, char paddingChar) {
-		StringBuilder sb = new StringBuilder(value);
+	public static String padRight(String value, int length, char padding) {
+		var sb = new StringBuilder(value);
 
 		while (sb.length() < length) {
-			sb.append(paddingChar);
+			sb.append(padding);
 		}
 
 		return sb.toString();
 	}
 
 	public static String padRight(String value, int length) {
-		return padRight(value, length, DEFAULT_PADDING_CHAR);
+		return padRight(value, length, DEFAULT_PADDING);
 	}
 
-    public static String wrap(String value, String container) {
-        return value == null
-                ? null
-                : container + value.replace(container, container + container) + container;
+    public static String wrap(String value, String wrapper) {
+        return value != null
+                ? wrapper + value.replace(wrapper, wrapper + wrapper) + wrapper
+                : null;
     }
 
     public static String wrap(String value) {
-        return wrap(value, DEFAULT_CONTAINER);
+        return wrap(value, DEFAULT_WRAPPER);
     }
 
-    public static String unwrap(String value, String container) {
+    public static String unwrap(String value, String wrapper) {
         if (null == value) return null;
 
         value = value.trim();
 
-        if (!(value.length() >= 2 * container.length() &&
-                value.startsWith(container) &&
-                value.endsWith(container))) return value;
+        if (!(value.length() >= 2 * wrapper.length() &&
+                value.startsWith(wrapper) &&
+                value.endsWith(wrapper))) return value;
 
-        return value.substring(container.length(), value.length() - container.length())
-                .replace(container + container, container);
+        return value.substring(wrapper.length(), value.length() - wrapper.length())
+                .replace(wrapper + wrapper, wrapper);
     }
 
     public static String unwrap(String value) {
-        return unwrap(value, DEFAULT_CONTAINER);
+        return unwrap(value, DEFAULT_WRAPPER);
     }
 
 	public static String camelCase(String value) {
@@ -121,7 +121,7 @@ public final class StringUtil {
     }
 
     public static String splitJoinCamelCase(String value, String regex) {
-        return joinCamelCase(value.split(regex));
+        return value != null ? joinCamelCase(value.split(regex)) : null;
     }
 
     public static String splitJoinCamelCase(String value) {
@@ -129,7 +129,7 @@ public final class StringUtil {
     }
 
 	public static String splitJoinPascalCase(String value, String regex) {
-		return joinPascalCase(value.split(regex));
+		return value != null ? joinPascalCase(value.split(regex)) : null;
 	}
 
 	public static String splitJoinPascalCase(String value) {
@@ -137,31 +137,30 @@ public final class StringUtil {
 	}
 
 	public static String reverseCase(String value) {
-		StringBuilder sb = new StringBuilder();
+		var sb = new StringBuilder();
 
 		for (int i = 0; i < value.length(); i++) {
 			char c = value.charAt(i);
 
-			if (Character.isUpperCase(c)) {
-				sb.append(Character.toLowerCase(c));
-			} else if (Character.isLowerCase(c)) {
-				sb.append(Character.toUpperCase(c));
-			} else {
-				sb.append(c);
-			}
+			if (Character.isUpperCase(c))
+                sb.append(Character.toLowerCase(c));
+            else if (Character.isLowerCase(c))
+                sb.append(Character.toUpperCase(c));
+            else
+                sb.append(c);
 		}
 
 		return sb.toString();
 	}
 
-    public static String removeAccents(String value) {
-        return value == null
-                ? null
-                : Normalizer.normalize(value, Normalizer.Form.NFKD).replaceAll("\\p{M}", "");
+    public static String trimAccents(String value) {
+        return value != null
+                ? Normalizer.normalize(value, Normalizer.Form.NFKD).replaceAll("\\p{M}", "")
+                : null;
     }
     
     public static String randomString(int length) {
-        StringBuilder sb = new StringBuilder();
+        var sb = new StringBuilder();
         Random random = ThreadLocalRandom.current();
         int max = ALPHABET.length();
         

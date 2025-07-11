@@ -2,7 +2,6 @@ package org.addy.util;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ArgumentsSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
@@ -144,9 +143,9 @@ class StringUtilTest {
     }
 
     @Test
-    void removeAccentsWorks() {
-        assertEquals("Eleves du maitre a Noel", StringUtil.removeAccents("Élèves du maître à Noël"));
-        assertEquals("jeunesse", StringUtil.removeAccents("jeunesse"));
+    void trimAccentsWorks() {
+        assertEquals("Eleves du maitre a Noel", StringUtil.trimAccents("Élèves du maître à Noël"));
+        assertEquals("jeunesse", StringUtil.trimAccents("jeunesse"));
     }
 
     @Test
