@@ -10,6 +10,10 @@
     <name>Addy Utilities</name>
     <description>General utility class library by Addy</description>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
     <repositories>
         <repository>
             <id>jr-ce-releases</id>
