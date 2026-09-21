@@ -15,12 +15,15 @@ import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 public final class TypeConverter {
+    private static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
+    private static final ZoneOffset DEFAULT_ZONE_OFFSET = OffsetTime.now(DEFAULT_ZONE_ID).getOffset();
+    
     private TypeConverter() {}
 
     public static boolean toBoolean(Object value) {
         if (value == null) return false;
         if (value instanceof Boolean) return (boolean) value;
-        if (value instanceof Number) return ((Number) value).intValue() != 0;
+        if (value instanceof Number number) return number.intValue() != 0;
         if (value instanceof CharSequence) return Boolean.parseBoolean(value.toString());
         return convertByIntrospection(value, boolean.class);
     }
@@ -28,7 +31,7 @@ public final class TypeConverter {
     public static char toChar(Object value) {
         if (value == null) return '\0';
         if (value instanceof Boolean) return (boolean) value ? '1' : '0';
-        if (value instanceof Number) return (char) ((Number) value).intValue();
+        if (value instanceof Number number) return (char) (number).intValue();
 
         if (value instanceof CharSequence) {
             String str = value.toString();
@@ -42,7 +45,7 @@ public final class TypeConverter {
     public static byte toByte(Object value) {
         if (value == null) return (byte) 0;
         if (value instanceof Boolean) return (byte) ((boolean) value ? 1 : 0);
-        if (value instanceof Number) return ((Number) value).byteValue();
+        if (value instanceof Number number) return number.byteValue();
         if (value instanceof CharSequence) return Byte.parseByte(value.toString());
         return convertByIntrospection(value, byte.class);
     }
@@ -50,7 +53,7 @@ public final class TypeConverter {
     public static short toShort(Object value) {
         if (value == null) return (short) 0;
         if (value instanceof Boolean) return (short) ((boolean) value ? 1 : 0);
-        if (value instanceof Number) return ((Number) value).shortValue();
+        if (value instanceof Number number) return number.shortValue();
         if (value instanceof CharSequence) return Short.parseShort(value.toString());
         return convertByIntrospection(value, short.class);
     }
@@ -58,7 +61,7 @@ public final class TypeConverter {
     public static int toInt(Object value) {
         if (value == null) return 0;
         if (value instanceof Boolean) return (boolean) value ? 1 : 0;
-        if (value instanceof Number) return ((Number) value).intValue();
+        if (value instanceof Number number) return number.intValue();
         if (value instanceof CharSequence) return Integer.parseInt(value.toString());
         return convertByIntrospection(value, int.class);
     }
@@ -66,7 +69,7 @@ public final class TypeConverter {
     public static long toLong(Object value) {
         if (value == null) return 0L;
         if (value instanceof Boolean) return (boolean) value ? 1L : 0L;
-        if (value instanceof Number) return ((Number) value).longValue();
+        if (value instanceof Number number) return number.longValue();
         if (value instanceof CharSequence) return Long.parseLong(value.toString());
         return convertByIntrospection(value, long.class);
     }
@@ -74,7 +77,7 @@ public final class TypeConverter {
     public static float toFloat(Object value) {
         if (value == null) return 0F;
         if (value instanceof Boolean) return (boolean) value ? 1F : 0F;
-        if (value instanceof Number) return ((Number) value).floatValue();
+        if (value instanceof Number number) return number.floatValue();
         if (value instanceof CharSequence) return Float.parseFloat(value.toString());
         return convertByIntrospection(value, float.class);
     }
@@ -82,7 +85,7 @@ public final class TypeConverter {
     public static double toDouble(Object value) {
         if (value == null) return 0.0;
         if (value instanceof Boolean) return (boolean) value ? 1.0 : 0.0;
-        if (value instanceof Number) return ((Number) value).doubleValue();
+        if (value instanceof Number number) return number.doubleValue();
         if (value instanceof CharSequence) return Double.parseDouble(value.toString());
         return convertByIntrospection(value, double.class);
     }
@@ -101,24 +104,20 @@ public final class TypeConverter {
 
     public static Date toDate(Object value) {
         if (value == null || value instanceof Date) return (Date) value;
+        if (value instanceof ZonedDateTime zdt) return Date.from(zdt.toInstant());
+        if (value instanceof OffsetDateTime odt) return Date.from(odt.toInstant());
 
-        if (value instanceof ZonedDateTime)
-            return Date.from(((ZonedDateTime) value).toInstant());
+        if (value instanceof LocalDateTime ldt)
+            return Date.from(ldt.atZone(DEFAULT_ZONE_ID).toInstant());
 
-        if (value instanceof OffsetDateTime)
-            return Date.from(((OffsetDateTime) value).toInstant());
+        if (value instanceof LocalDate ld)
+            return Date.from(ld.atStartOfDay(DEFAULT_ZONE_ID).toInstant());
 
-        if (value instanceof LocalDateTime)
-            return Date.from(((LocalDateTime) value).atZone(ZoneId.systemDefault()).toInstant());
+        if (value instanceof OffsetTime ot)
+            return Date.from(ot.atDate(LocalDate.MIN).toInstant());
 
-        if (value instanceof LocalDate)
-            return Date.from(((LocalDate) value).atStartOfDay(ZoneId.systemDefault()).toInstant());
-
-        if (value instanceof OffsetTime)
-            return Date.from(((OffsetTime) value).atDate(LocalDate.MIN).toInstant());
-
-        if (value instanceof LocalTime)
-            return Date.from(((LocalTime) value).atDate(LocalDate.MIN).atZone(ZoneId.systemDefault()).toInstant());
+        if (value instanceof LocalTime lt)
+            return Date.from(lt.atDate(LocalDate.MIN).atZone(DEFAULT_ZONE_ID).toInstant());
 
         if (value instanceof CharSequence) {
             try {
@@ -133,81 +132,47 @@ public final class TypeConverter {
 
     public static ZonedDateTime toZonedDateTime(Object value) {
         if (value == null || value instanceof ZonedDateTime) return (ZonedDateTime) value;
-
-        if (value instanceof LocalDateTime)
-            return ((LocalDateTime) value).atZone(ZoneId.systemDefault());
-
-        if (value instanceof LocalDate)
-            return ((LocalDate) value).atStartOfDay().atZone(ZoneId.systemDefault());
-
-        if (value instanceof OffsetTime)
-            return ((OffsetTime) value).atDate(LocalDate.MIN).toZonedDateTime();
-
-        if (value instanceof LocalTime)
-            return ((LocalTime) value).atDate(LocalDate.MIN).atZone(ZoneId.systemDefault());
-
-        if (value instanceof Date)
-            return ((Date) value).toInstant().atZone(ZoneId.systemDefault());
-
+        if (value instanceof LocalDateTime ldt) return ldt.atZone(DEFAULT_ZONE_ID);
+        if (value instanceof LocalDate ld) return ld.atStartOfDay().atZone(DEFAULT_ZONE_ID);
+        if (value instanceof OffsetTime ot) return ot.atDate(LocalDate.MIN).toZonedDateTime();
+        if (value instanceof LocalTime lt) return lt.atDate(LocalDate.MIN).atZone(DEFAULT_ZONE_ID);
+        if (value instanceof Date d) return d.toInstant().atZone(DEFAULT_ZONE_ID);
         return convertByIntrospection(value, ZonedDateTime.class);
     }
 
     public static OffsetDateTime toOffsetDateTime(Object value) {
         if (value == null || value instanceof OffsetDateTime) return (OffsetDateTime) value;
-
-        if (value instanceof LocalDateTime)
-            return ((LocalDateTime) value).atOffset((ZoneOffset) ZoneId.systemDefault());
-
-        if (value instanceof LocalDate)
-            return ((LocalDate) value).atStartOfDay().atOffset((ZoneOffset) ZoneId.systemDefault());
-
-        if (value instanceof OffsetTime)
-            return ((OffsetTime) value).atDate(LocalDate.MIN);
-
-        if (value instanceof LocalTime)
-            return ((LocalTime) value).atDate(LocalDate.MIN).atOffset((ZoneOffset) ZoneId.systemDefault());
-
-        if (value instanceof Date)
-            return ((Date) value).toInstant().atOffset((ZoneOffset) ZoneId.systemDefault());
-
+        if (value instanceof LocalDateTime ldt) return ldt.atOffset(DEFAULT_ZONE_OFFSET);
+        if (value instanceof LocalDate ld) return ld.atStartOfDay().atOffset(DEFAULT_ZONE_OFFSET);
+        if (value instanceof OffsetTime ot) return ot.atDate(LocalDate.MIN);
+        if (value instanceof LocalTime lt) return lt.atDate(LocalDate.MIN).atOffset(DEFAULT_ZONE_OFFSET);
+        if (value instanceof Date d) return d.toInstant().atOffset(DEFAULT_ZONE_OFFSET);
         return convertByIntrospection(value, OffsetDateTime.class);
     }
 
     public static LocalDateTime toLocalDateTime(Object value) {
         if (value == null || value instanceof LocalDateTime) return (LocalDateTime) value;
-        if (value instanceof LocalDate) return ((LocalDate) value).atStartOfDay();
-        if (value instanceof LocalTime) return ((LocalTime) value).atDate(LocalDate.MIN);
-
-        if (value instanceof Date)
-            return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-
+        if (value instanceof LocalDate ld) return ld.atStartOfDay();
+        if (value instanceof LocalTime lt) return lt.atDate(LocalDate.MIN);
+        if (value instanceof Date d) return d.toInstant().atZone(DEFAULT_ZONE_ID).toLocalDateTime();
         return convertByIntrospection(value, LocalDateTime.class);
     }
 
     public static LocalDate toLocalDate(Object value) {
         if (value == null || value instanceof LocalDate) return (LocalDate) value;
-
-        if (value instanceof Date)
-            return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
+        if (value instanceof Date d) return d.toInstant().atZone(DEFAULT_ZONE_ID).toLocalDate();
         return convertByIntrospection(value, LocalDate.class);
     }
 
     public static OffsetTime toOffsetTime(Object value) {
         if (value == null || value instanceof OffsetTime) return (OffsetTime) value;
-
-        if (value instanceof Date)
-            return ((Date) value).toInstant().atOffset((ZoneOffset) ZoneId.systemDefault()).toOffsetTime();
-
+        if (value instanceof Date d) return d.toInstant().atOffset(DEFAULT_ZONE_OFFSET).toOffsetTime();
         return convertByIntrospection(value, OffsetTime.class);
     }
 
     public static LocalTime toLocalTime(Object value) {
         if (value == null || value instanceof LocalTime) return (LocalTime) value;
-
-        if (value instanceof Date)
-            return ((Date) value).toInstant().atZone(ZoneId.systemDefault()).toLocalTime();
-
+        if (value instanceof Date d) return d.toInstant().atZone(DEFAULT_ZONE_ID).toLocalTime();
         return convertByIntrospection(value, LocalTime.class);
     }
 

@@ -1,7 +1,6 @@
 package org.addy.util;
 
 import java.util.*;
-import java.util.stream.Stream;
 
 public final class CollectionUtil {
     private CollectionUtil() {}
@@ -10,24 +9,12 @@ public final class CollectionUtil {
         return collection == null || collection.isEmpty();
     }
 
-    public static <T> boolean isEmpty(T[] array) {
-        return array == null || array.length == 0;
-    }
-
     public static <T> Optional<T> first(Collection<T> collection) {
         return collection.stream().findFirst();
     }
 
-    public static <T> Optional<T> first(T[] array) {
-        return Stream.of(array).findFirst();
-    }
-
     public static <T> T requiredFirst(Collection<T> collection) {
         return first(collection).orElseThrow();
-    }
-
-    public static <T> T requiredFirst(T[] array) {
-        return first(array).orElseThrow();
     }
 
     public static <T> List<T> toList(Collection<T> collection) {

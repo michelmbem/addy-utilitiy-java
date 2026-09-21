@@ -13,7 +13,7 @@ public final class StringUtil {
     public static final String DEFAULT_WRAPPER = "'";
     public static final String DEFAULT_DELIMITER = "";
 	public static final String DEFAULT_SPLIT_REGEX = "[\\W_]+";
-	private static final String ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+	private static final String DEFAULT_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
 	public static boolean isEmpty(String value) {
 		return value == null || value.isEmpty();
@@ -153,21 +153,25 @@ public final class StringUtil {
 		return sb.toString();
 	}
 
-    public static String trimAccents(String value) {
+    public static String stripAccents(String value) {
         return value != null
                 ? Normalizer.normalize(value, Normalizer.Form.NFKD).replaceAll("\\p{M}", "")
                 : null;
     }
     
-    public static String randomString(int length) {
+    public static String randomString(int length, String alphabaet) {
         var sb = new StringBuilder();
         Random random = ThreadLocalRandom.current();
-        int max = ALPHABET.length();
+        int max = alphabaet.length();
         
         for (int i = 0; i < length; ++i) {
-            sb.append(ALPHABET.charAt(random.nextInt(max)));
+            sb.append(alphabaet.charAt(random.nextInt(max)));
         }
         
         return sb.toString();
     }
+
+	public static String randomString(int length) {
+		return randomString(length, DEFAULT_ALPHABET);
+	}
 }

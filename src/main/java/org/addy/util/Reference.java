@@ -23,7 +23,7 @@ public final class Reference<T> {
 
     @Override
     public boolean equals(Object other) {
-        return other instanceof Reference && Objects.equals(target, ((Reference<?>) other).target);
+        return other instanceof Reference<?> ref && Objects.equals(target, ref.target);
     }
 
     @Override

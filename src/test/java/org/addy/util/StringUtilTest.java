@@ -143,9 +143,9 @@ class StringUtilTest {
     }
 
     @Test
-    void trimAccentsWorks() {
-        assertEquals("Eleves du maitre a Noel", StringUtil.trimAccents("Élèves du maître à Noël"));
-        assertEquals("jeunesse", StringUtil.trimAccents("jeunesse"));
+    void stripAccentsWorks() {
+        assertEquals("Eleves du maitre a Noel", StringUtil.stripAccents("Élèves du maître à Noël"));
+        assertEquals("jeunesse", StringUtil.stripAccents("jeunesse"));
     }
 
     @Test

@@ -53,8 +53,7 @@ public final class ImageHelper {
     private ImageHelper() {}
     
     public static BufferedImage buffer(Image originalImage, int imageType) {
-        if (originalImage instanceof BufferedImage)
-        	return (BufferedImage) originalImage;
+        if (originalImage instanceof BufferedImage bi) return bi;
         
         BufferedImage bufferedImage = new BufferedImage(
         		originalImage.getWidth(null), originalImage.getHeight(null), imageType);
@@ -246,29 +245,15 @@ public final class ImageHelper {
         try {
             Image image = ImageIO.read(sourceFile);
 
-            switch (orientation) {
-                case ORIENTATION_FLIP_HORIZONTAL:
-                    image = flip(image, AXIS_Y);
-                    break;
-                case ORIENTATION_FLIP_VERTICAL:
-                    image = flip(image, AXIS_X);
-                    break;
-                case ORIENTATION_ROTATE_CW:
-                    image = rotate(image, CW);
-                    break;
-                case ORIENTATION_ROTATE_CCW:
-                    image = rotate(image, CCW);
-                    break;
-                case ORIENTATION_ROTATE_180:
-                    image = rotate(image, DCW);
-                    break;
-                case ORIENTATION_FLIP_HORIZONTAL_ROTATE_CW:
-                    image = rotate(flip(image, AXIS_Y), CW);
-                    break;
-                default:
-                    image = rotate(flip(image, AXIS_X), CW);
-                    break;
-            }
+            image = switch (orientation) {
+                case ORIENTATION_FLIP_HORIZONTAL -> flip(image, AXIS_Y);
+                case ORIENTATION_FLIP_VERTICAL -> flip(image, AXIS_X);
+                case ORIENTATION_ROTATE_CW -> rotate(image, CW);
+                case ORIENTATION_ROTATE_CCW -> rotate(image, CCW);
+                case ORIENTATION_ROTATE_180 -> rotate(image, DCW);
+                case ORIENTATION_FLIP_HORIZONTAL_ROTATE_CW -> rotate(flip(image, AXIS_Y), CW);
+                default -> rotate(flip(image, AXIS_X), CW);
+            };
 
             ImageIO.write((RenderedImage) image, "jpg", destFile);
         } catch (IOException ex) {
