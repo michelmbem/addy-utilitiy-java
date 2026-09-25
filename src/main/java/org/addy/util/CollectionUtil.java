@@ -1,6 +1,7 @@
 package org.addy.util;
 
 import java.util.*;
+import java.util.function.Predicate;
 
 public final class CollectionUtil {
     private CollectionUtil() {}
@@ -13,8 +14,16 @@ public final class CollectionUtil {
         return collection.stream().findFirst();
     }
 
+    public static <T> Optional<T> first(Collection<T> collection, Predicate<T> predicate) {
+        return collection.stream().filter(predicate).findFirst();
+    }
+
     public static <T> T requiredFirst(Collection<T> collection) {
         return first(collection).orElseThrow();
+    }
+
+    public static <T> T requiredFirst(Collection<T> collection, Predicate<T> predicate) {
+        return first(collection, predicate).orElseThrow();
     }
 
     public static <T> List<T> toList(Collection<T> collection) {

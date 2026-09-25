@@ -227,7 +227,7 @@ public final class FileUtil {
 
         try (var reader = new BufferedReader(new InputStreamReader(input))) {
             while ((line = reader.readLine()) != null) {
-                if (sb.length() > 0) sb.append(newLine);
+                if (!sb.isEmpty()) sb.append(newLine);
                 sb.append(line);
             }
         }
@@ -252,8 +252,9 @@ public final class FileUtil {
         String line;
 
         try (var reader = new BufferedReader(new InputStreamReader(input))) {
-            while ((line = reader.readLine()) != null)
+            while ((line = reader.readLine()) != null) {
                 lines.add(line);
+            }
         }
 
         return lines.toArray(String[]::new);
@@ -271,23 +272,24 @@ public final class FileUtil {
         }
     }
 
-    public static void eachLine(InputStream input, Consumer<String> consumer) throws IOException {
+    public static void forEachLine(InputStream input, Consumer<String> consumer) throws IOException {
         String line;
         try (var reader = new BufferedReader(new InputStreamReader(input))) {
-            while ((line = reader.readLine()) != null)
+            while ((line = reader.readLine()) != null) {
                 consumer.accept(line);
+            }
         }
     }
 
-    public static void eachLine(File file, Consumer<String> consumer) throws IOException {
+    public static void forEachLine(File file, Consumer<String> consumer) throws IOException {
         try (var input = new FileInputStream(file)) {
-            eachLine(input, consumer);
+            forEachLine(input, consumer);
         }
     }
 
-    public static void eachLine(String path, Consumer<String> consumer) throws IOException {
+    public static void forEachLine(String path, Consumer<String> consumer) throws IOException {
         try (var input = new FileInputStream(path)) {
-            eachLine(input, consumer);
+            forEachLine(input, consumer);
         }
     }
 
@@ -343,7 +345,7 @@ public final class FileUtil {
         }
     }
 
-    /// ////////////// INNER CLASSES AND INTERFACES ///////////////////
+    //==================== INNER CLASSES AND INTERFACES ====================
 
     @FunctionalInterface
     public interface TreeWalker {
@@ -370,7 +372,7 @@ public final class FileUtil {
 
         @Override
         public boolean accept(File file) {
-            return pattern.matcher(file.getPath()).matches();
+            return file.isDirectory() || pattern.matcher(file.getPath()).matches();
         }
 
         public final Pattern getPattern() {

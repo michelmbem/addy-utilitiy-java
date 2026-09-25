@@ -77,6 +77,42 @@ public final class ArrayUtil {
         return array.length > 0 ? Optional.of(array[0]) : Optional.empty();
     }
 
+    public static <T> Optional<T> last(T[] array) {
+        return array.length > 0 ? Optional.of(array[array.length - 1]) : Optional.empty();
+    }
+
+    public static Optional<Boolean> last(boolean[] array) {
+        return array.length > 0 ? Optional.of(array[array.length - 1]) : Optional.empty();
+    }
+
+    public static Optional<Character> last(char[] array) {
+        return array.length > 0 ? Optional.of(array[array.length - 1]) : Optional.empty();
+    }
+
+    public static Optional<Byte> last(byte[] array) {
+        return array.length > 0 ? Optional.of(array[array.length - 1]) : Optional.empty();
+    }
+
+    public static Optional<Short> last(short[] array) {
+        return array.length > 0 ? Optional.of(array[array.length - 1]) : Optional.empty();
+    }
+
+    public static Optional<Integer> last(int[] array) {
+        return array.length > 0 ? Optional.of(array[array.length - 1]) : Optional.empty();
+    }
+
+    public static Optional<Long> last(long[] array) {
+        return array.length > 0 ? Optional.of(array[array.length - 1]) : Optional.empty();
+    }
+
+    public static Optional<Float> last(float[] array) {
+        return array.length > 0 ? Optional.of(array[array.length - 1]) : Optional.empty();
+    }
+
+    public static Optional<Double> last(double[] array) {
+        return array.length > 0 ? Optional.of(array[array.length - 1]) : Optional.empty();
+    }
+
     public static <T> T requiredFirst(T[] array) {
         return first(array).orElseThrow();
     }
@@ -111,5 +147,41 @@ public final class ArrayUtil {
 
     public static double requiredFirst(double[] array) {
         return first(array).orElseThrow();
+    }
+
+    public static <T> T requiredLast(T[] array) {
+        return last(array).orElseThrow();
+    }
+
+    public static boolean requiredLast(boolean[] array) {
+        return last(array).orElseThrow();
+    }
+
+    public static char requiredLast(char[] array) {
+        return last(array).orElseThrow();
+    }
+
+    public static byte requiredLast(byte[] array) {
+        return last(array).orElseThrow();
+    }
+
+    public static short requiredLast(short[] array) {
+        return last(array).orElseThrow();
+    }
+
+    public static int requiredLast(int[] array) {
+        return last(array).orElseThrow();
+    }
+
+    public static long requiredLast(long[] array) {
+        return last(array).orElseThrow();
+    }
+
+    public static float requiredLast(float[] array) {
+        return last(array).orElseThrow();
+    }
+
+    public static double requiredLast(double[] array) {
+        return last(array).orElseThrow();
     }
 }

@@ -176,7 +176,7 @@ class FileUtilTest {
 		FileUtil.PatternFilter filter = new FileUtil.PatternFilter(".*from-internet.*");
 		assertFalse(filter.accept(file1));
 		assertTrue(filter.accept(file2));
-		assertFalse(filter.accept(file3));
+		assertTrue(filter.accept(file3));
 		assertFalse(filter.accept(file4));
 	}
 
