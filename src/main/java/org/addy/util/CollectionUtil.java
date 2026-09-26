@@ -34,15 +34,27 @@ public final class CollectionUtil {
         return new HashSet<>(collection);
     }
 
-    public static <T> List<T> concat(Collection<T> collection1, Collection<T> collection2) {
+    @SafeVarargs
+    public static <T> List<T> concat(Collection<T> collection1,
+                                     Collection<T> collection2,
+                                     Collection<T>... otherCollections) {
         ArrayList<T> result = new ArrayList<>(collection1);
         result.addAll(collection2);
+
+        if (otherCollections != null) {
+            for (Collection<T> otherCollection : otherCollections) {
+                result.addAll(otherCollection);
+            }
+        }
+
         return result;
     }
 
     public static <T> List<T> repeat(T item, int times) {
         ArrayList<T> result = new ArrayList<>(times);
-        Collections.fill(result, item);
+        for (int i = 0; i < times; ++i) {
+            result.add(item);
+        }
         return result;
     }
 }
