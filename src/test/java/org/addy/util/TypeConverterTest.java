@@ -8,7 +8,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
-import java.util.Objects;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -23,7 +22,7 @@ class TypeConverterTest {
         assertThat(f2).isEqualTo(f1);
         assertThat(f3).isEqualTo(f1);
         assertThat(f4).isEqualTo(f1);
-        assertThat(f5.getDenominator()).isPositive();
+        assertThat(f5.denominator()).isPositive();
         assertThat(f1).hasToString("4");
         assertThat(f5).hasToString("-5/3");
     }
@@ -72,29 +71,18 @@ class TypeConverterTest {
         assertThat(i).isEqualTo(f.asInt());
     }
 
-    static class Fraction {
-        private final int numerator;
-        private final int denominator;
-
-        public Fraction(int numerator, int denominator) {
+    record Fraction(int numerator, int denominator) {
+        Fraction(int numerator, int denominator) {
             if (denominator == 0)
                 throw new IllegalArgumentException("denominator cannot be 0");
 
             int g = gcd(numerator, denominator);
-            this.numerator  = numerator / g;
+            this.numerator = numerator / g;
             this.denominator = denominator / g;
         }
 
         public Fraction(int numerator) {
             this(numerator, 1);
-        }
-
-        public int getNumerator() {
-            return numerator;
-        }
-
-        public int getDenominator() {
-            return denominator;
         }
 
         public double toDouble() {
@@ -106,25 +94,11 @@ class TypeConverterTest {
         }
 
         @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-            Fraction fraction = (Fraction) o;
-            return numerator == fraction.numerator && denominator == fraction.denominator;
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(numerator, denominator);
-        }
-
-        @Override
         public String toString() {
             return denominator == 1 ? String.valueOf(numerator) : numerator + "/" + denominator;
         }
 
-        private static int gcd(int a, int b)
-        {
+        private static int gcd(int a, int b) {
             return b == 0 ? a : gcd(b, a % b);
         }
     }

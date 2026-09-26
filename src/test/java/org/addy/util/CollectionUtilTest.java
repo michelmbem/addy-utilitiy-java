@@ -43,9 +43,9 @@ class CollectionUtilTest {
     @Test
     void concatWorks() {
         var list2 = List.of("four", "five", "six");
-        var set = Set.of("seven", "eight");
+        var list3 = List.of("seven", "eight");
         var expected = List.of("one", "two", "three", "four", "five", "six", "seven", "eight");
-        assertEquals(expected, CollectionUtil.concat(LIST, list2, set));
+        assertEquals(expected, CollectionUtil.concat(LIST, list2, list3));
     }
 
     @Test
