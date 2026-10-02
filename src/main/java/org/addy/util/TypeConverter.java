@@ -31,12 +31,13 @@ public final class TypeConverter {
     public static char toChar(Object value) {
         if (value == null) return '\0';
         if (value instanceof Boolean) return (boolean) value ? '1' : '0';
-        if (value instanceof Number number) return (char) (number).intValue();
+        if (value instanceof Number number) return (char) number.intValue();
 
         if (value instanceof CharSequence) {
             String str = value.toString();
             if (str.length() == 1) return  str.charAt(0);
-            throw new IllegalArgumentException("The given character sequence is either empty or has more then one character");
+            throw new IllegalArgumentException(
+                    "The given character sequence is either empty or has more then one character");
         }
 
         return convertByIntrospection(value, char.class);
