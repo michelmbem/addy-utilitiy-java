@@ -179,6 +179,7 @@ public final class TypeConverter {
 
     public static Object toType(Object value, Class<?> targetType) {
         if (targetType == Boolean.class) return toBoolean(value);
+        if (targetType == Character.class) return toChar(value);
         if (targetType == Byte.class) return toByte(value);
         if (targetType == Short.class) return toShort(value);
         if (targetType == Integer.class) return toInt(value);
