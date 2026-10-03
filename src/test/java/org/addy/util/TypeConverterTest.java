@@ -13,6 +13,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 class TypeConverterTest {
     @Test
+    void toIntWorks() {
+        assertThat(TypeConverter.toInt(1.5f)).isEqualTo(1);
+        assertThat(TypeConverter.toInt(true)).isEqualTo(1);
+        assertThat(TypeConverter.toInt(2.8)).isEqualTo(2);
+        assertThat(TypeConverter.toInt(new BigInteger("314"))).isEqualTo(314);
+        assertThat(TypeConverter.toInt("1985")).isEqualTo(1985);
+    }
+
+    @Test
     void Fraction_works() {
         Fraction f1 = new Fraction(8, 2);
         Fraction f2 = new Fraction(16, 4);
