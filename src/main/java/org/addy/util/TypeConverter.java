@@ -30,6 +30,7 @@ public final class TypeConverter {
 
     public static char toChar(Object value) {
         if (value == null) return '\0';
+        if (value instanceof Character chr) return chr;
         if (value instanceof Boolean) return (boolean) value ? '1' : '0';
         if (value instanceof Number number) return (char) number.intValue();
 
@@ -46,6 +47,7 @@ public final class TypeConverter {
     public static byte toByte(Object value) {
         if (value == null) return (byte) 0;
         if (value instanceof Boolean) return (byte) ((boolean) value ? 1 : 0);
+        if (value instanceof Character chr) return (byte) chr.charValue();
         if (value instanceof Number number) return number.byteValue();
         if (value instanceof CharSequence) return Byte.parseByte(value.toString());
         return convertByIntrospection(value, byte.class);
@@ -54,6 +56,7 @@ public final class TypeConverter {
     public static short toShort(Object value) {
         if (value == null) return (short) 0;
         if (value instanceof Boolean) return (short) ((boolean) value ? 1 : 0);
+        if (value instanceof Character chr) return (short) chr.charValue();
         if (value instanceof Number number) return number.shortValue();
         if (value instanceof CharSequence) return Short.parseShort(value.toString());
         return convertByIntrospection(value, short.class);
@@ -62,6 +65,7 @@ public final class TypeConverter {
     public static int toInt(Object value) {
         if (value == null) return 0;
         if (value instanceof Boolean) return (boolean) value ? 1 : 0;
+        if (value instanceof Character chr) return chr;
         if (value instanceof Number number) return number.intValue();
         if (value instanceof CharSequence) return Integer.parseInt(value.toString());
         return convertByIntrospection(value, int.class);
@@ -70,6 +74,7 @@ public final class TypeConverter {
     public static long toLong(Object value) {
         if (value == null) return 0L;
         if (value instanceof Boolean) return (boolean) value ? 1L : 0L;
+        if (value instanceof Character chr) return chr;
         if (value instanceof Number number) return number.longValue();
         if (value instanceof CharSequence) return Long.parseLong(value.toString());
         return convertByIntrospection(value, long.class);
@@ -78,6 +83,7 @@ public final class TypeConverter {
     public static float toFloat(Object value) {
         if (value == null) return 0F;
         if (value instanceof Boolean) return (boolean) value ? 1F : 0F;
+        if (value instanceof Character chr) return chr;
         if (value instanceof Number number) return number.floatValue();
         if (value instanceof CharSequence) return Float.parseFloat(value.toString());
         return convertByIntrospection(value, float.class);
@@ -86,6 +92,7 @@ public final class TypeConverter {
     public static double toDouble(Object value) {
         if (value == null) return 0.0;
         if (value instanceof Boolean) return (boolean) value ? 1.0 : 0.0;
+        if (value instanceof Character chr) return chr;
         if (value instanceof Number number) return number.doubleValue();
         if (value instanceof CharSequence) return Double.parseDouble(value.toString());
         return convertByIntrospection(value, double.class);
@@ -94,17 +101,23 @@ public final class TypeConverter {
     public static BigInteger toBigInteger(Object value) {
         if (value == null || value instanceof BigInteger) return (BigInteger) value;
         if (value instanceof Boolean) return (boolean) value ? BigInteger.ONE : BigInteger.ZERO;
+        if (value instanceof Character chr) return BigInteger.valueOf(chr);
+        if (value instanceof Number number) return BigInteger.valueOf(number.longValue());
         return convertByIntrospection(value, BigInteger.class);
     }
 
     public static BigDecimal toBigDecimal(Object value) {
         if (value == null || value instanceof BigDecimal) return (BigDecimal) value;
+        if (value instanceof BigInteger bi) return new BigDecimal(bi);
         if (value instanceof Boolean) return (boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
+        if (value instanceof Character chr) return BigDecimal.valueOf(chr);
+        if (value instanceof Number number) return BigDecimal.valueOf(number.doubleValue());
         return convertByIntrospection(value, BigDecimal.class);
     }
 
     public static Date toDate(Object value) {
         if (value == null || value instanceof Date) return (Date) value;
+        if (value instanceof Instant instant) return Date.from(instant);
         if (value instanceof ZonedDateTime zdt) return Date.from(zdt.toInstant());
         if (value instanceof OffsetDateTime odt) return Date.from(odt.toInstant());
 
@@ -131,8 +144,18 @@ public final class TypeConverter {
         return convertByIntrospection(value, Date.class);
     }
 
+    public static Instant toInstant(Object value) {
+        if (value == null || value instanceof Instant) return (Instant) value;
+        if (value instanceof LocalDateTime ldt) return ldt.toInstant(DEFAULT_ZONE_OFFSET);
+        if (value instanceof LocalDate ld) return ld.atStartOfDay().toInstant(DEFAULT_ZONE_OFFSET);
+        if (value instanceof OffsetTime ot) return ot.atDate(LocalDate.MIN).toInstant();
+        if (value instanceof LocalTime lt) return lt.atDate(LocalDate.MIN).toInstant(DEFAULT_ZONE_OFFSET);
+        return convertByIntrospection(value, Instant.class);
+    }
+
     public static ZonedDateTime toZonedDateTime(Object value) {
         if (value == null || value instanceof ZonedDateTime) return (ZonedDateTime) value;
+        if (value instanceof Instant instant) return instant.atZone(DEFAULT_ZONE_ID);
         if (value instanceof LocalDateTime ldt) return ldt.atZone(DEFAULT_ZONE_ID);
         if (value instanceof LocalDate ld) return ld.atStartOfDay().atZone(DEFAULT_ZONE_ID);
         if (value instanceof OffsetTime ot) return ot.atDate(LocalDate.MIN).toZonedDateTime();
@@ -143,6 +166,7 @@ public final class TypeConverter {
 
     public static OffsetDateTime toOffsetDateTime(Object value) {
         if (value == null || value instanceof OffsetDateTime) return (OffsetDateTime) value;
+        if (value instanceof Instant instant) return instant.atOffset(DEFAULT_ZONE_OFFSET);
         if (value instanceof LocalDateTime ldt) return ldt.atOffset(DEFAULT_ZONE_OFFSET);
         if (value instanceof LocalDate ld) return ld.atStartOfDay().atOffset(DEFAULT_ZONE_OFFSET);
         if (value instanceof OffsetTime ot) return ot.atDate(LocalDate.MIN);
@@ -153,6 +177,7 @@ public final class TypeConverter {
 
     public static LocalDateTime toLocalDateTime(Object value) {
         if (value == null || value instanceof LocalDateTime) return (LocalDateTime) value;
+        if (value instanceof Instant instant) return instant.atZone(DEFAULT_ZONE_ID).toLocalDateTime();
         if (value instanceof LocalDate ld) return ld.atStartOfDay();
         if (value instanceof LocalTime lt) return lt.atDate(LocalDate.MIN);
         if (value instanceof Date d) return d.toInstant().atZone(DEFAULT_ZONE_ID).toLocalDateTime();
@@ -161,23 +186,27 @@ public final class TypeConverter {
 
     public static LocalDate toLocalDate(Object value) {
         if (value == null || value instanceof LocalDate) return (LocalDate) value;
+        if (value instanceof Instant instant) return instant.atZone(DEFAULT_ZONE_ID).toLocalDate();
         if (value instanceof Date d) return d.toInstant().atZone(DEFAULT_ZONE_ID).toLocalDate();
         return convertByIntrospection(value, LocalDate.class);
     }
 
     public static OffsetTime toOffsetTime(Object value) {
         if (value == null || value instanceof OffsetTime) return (OffsetTime) value;
+        if (value instanceof Instant instant) return instant.atOffset(DEFAULT_ZONE_OFFSET).toOffsetTime();
         if (value instanceof Date d) return d.toInstant().atOffset(DEFAULT_ZONE_OFFSET).toOffsetTime();
         return convertByIntrospection(value, OffsetTime.class);
     }
 
     public static LocalTime toLocalTime(Object value) {
         if (value == null || value instanceof LocalTime) return (LocalTime) value;
+        if (value instanceof Instant instant) return instant.atZone(DEFAULT_ZONE_ID).toLocalTime();
         if (value instanceof Date d) return d.toInstant().atZone(DEFAULT_ZONE_ID).toLocalTime();
         return convertByIntrospection(value, LocalTime.class);
     }
 
     public static Object toType(Object value, Class<?> targetType) {
+        targetType = box(targetType);
         if (targetType == Boolean.class) return toBoolean(value);
         if (targetType == Character.class) return toChar(value);
         if (targetType == Byte.class) return toByte(value);
@@ -189,6 +218,7 @@ public final class TypeConverter {
         if (targetType == BigInteger.class) return toBigInteger(value);
         if (targetType == BigDecimal.class) return toBigDecimal(value);
         if (targetType == Date.class) return toDate(value);
+        if (targetType == Instant.class) return toInstant(value);
         if (targetType == ZonedDateTime.class) return toZonedDateTime(value);
         if (targetType == OffsetDateTime.class) return toOffsetDateTime(value);
         if (targetType == LocalDateTime.class) return toLocalDateTime(value);
@@ -197,6 +227,8 @@ public final class TypeConverter {
         if (targetType == LocalTime.class) return toLocalTime(value);
         if (targetType == String.class) return String.valueOf(value);
         if (value == null || targetType.isAssignableFrom(value.getClass())) return value;
+        if (targetType.isEnum() && (value instanceof Character || value instanceof CharSequence))
+            return Enum.valueOf((Class<? extends Enum>) targetType, value.toString());
         return convertByIntrospection(value, targetType);
     }
 
@@ -281,5 +313,18 @@ public final class TypeConverter {
         }
 
         return false;
+    }
+
+    private static Class<?> box(Class<?> type) {
+        if (!type.isPrimitive()) return type;
+        if (type == boolean.class) return Boolean.class;
+        if (type == char.class) return Character.class;
+        if (type == byte.class) return Byte.class;
+        if (type == short.class) return Short.class;
+        if (type == int.class) return Integer.class;
+        if (type == long.class) return Long.class;
+        if (type == float.class) return Float.class;
+        if (type == double.class) return Double.class;
+        throw new IllegalArgumentException("Could not find a boxed version of " + type.getName());
     }
 }

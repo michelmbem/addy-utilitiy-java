@@ -8,6 +8,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
+import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -18,7 +19,19 @@ class TypeConverterTest {
         assertThat(TypeConverter.toInt(true)).isEqualTo(1);
         assertThat(TypeConverter.toInt(2.8)).isEqualTo(2);
         assertThat(TypeConverter.toInt(new BigInteger("314"))).isEqualTo(314);
+        assertThat(TypeConverter.toInt('A')).isEqualTo(65);
         assertThat(TypeConverter.toInt("1985")).isEqualTo(1985);
+    }
+
+    @Test
+    void toTypeWorks() {
+        assertThat(TypeConverter.toType(1.5f, int.class)).isEqualTo(1);
+        assertThat(TypeConverter.toType(true, float.class)).isEqualTo(1f);
+        assertThat(TypeConverter.toType(2.8, BigDecimal.class)).isEqualTo(new BigDecimal("2.8"));
+        assertThat(TypeConverter.toType(new BigInteger("314"), Integer.class)).isEqualTo(314);
+        assertThat(TypeConverter.toType('A', ABC.class)).isEqualTo(ABC.A);
+        assertThat(TypeConverter.toType("1985-12-25", Date.class))
+                .isEqualTo(DateUtil.date(1985, 12, 25));
     }
 
     @Test
@@ -79,6 +92,8 @@ class TypeConverterTest {
         assertThat(d).isEqualTo(f.toDouble());
         assertThat(i).isEqualTo(f.asInt());
     }
+
+    enum ABC { A, B, C }
 
     record Fraction(int numerator, int denominator) {
         Fraction(int numerator, int denominator) {
