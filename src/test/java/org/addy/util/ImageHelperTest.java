@@ -66,7 +66,7 @@ class ImageHelperTest {
 			File srcFile = new File("files/daniel-corrected.jpg");
 			File destFile = new File("files/daniel-flipped.jpg");
 			Image srcImage = ImageIO.read(srcFile);
-			Image destImage = ImageHelper.flip(srcImage, ImageHelper.AXIS_Y);
+			Image destImage = ImageHelper.flip(srcImage, ImageHelper.FlipAxis.Y);
 			ImageIO.write((RenderedImage) destImage, "jpg", destFile);
 			assertTrue(destFile.isFile());
 		} catch (IOException e) {
