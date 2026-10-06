@@ -15,6 +15,19 @@ public final class DateUtil {
 	public static final int SECONDS_PER_HOUR = 3600;
 	public static final int SECONDS_PER_DAY = 86400;
 
+	public static String ISO_DATETIME_FORMAT_EXTENDED = "yyyy-MM-dd'T'HH:mm:ss";
+	public static String ISO_DATETIME_FORMAT_EXTENDED_ALT = "yyyy-MM-dd HH:mm:ss";
+	public static String ISO_DATETIME_FORMAT_EXTENDED_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'";
+	public static String ISO_DATE_FORMAT_EXTENDED = "yyyy-MM-dd";
+	public static String ISO_TIME_FORMAT_EXTENDED = "HH:mm:ss";
+	public static String ISO_TIME_FORMAT_EXTENDED_UTC = "HH:mm:ss'Z'";
+	public static String ISO_DATETIME_FORMAT_BASIC = "yyyyMMdd'T'HHmmss";
+	public static String ISO_DATETIME_FORMAT_BASIC_ALT = "yyyyMMddHHmmss";
+	public static String ISO_DATETIME_FORMAT_BASIC_UTC = "yyyyMMdd'T'HHmmss'Z'";
+	public static String ISO_DATE_FORMAT_BASIC = "yyyyMMdd";
+	public static String ISO_TIME_FORMAT_BASIC = "HHmmss";
+	public static String ISO_TIME_FORMAT_BASIC_UTC = "HHmmss'Z'";
+
 	private DateUtil() {}
 
 	public static Date dateTime(int year, int month, int day, int hour, int minute, int second) {
@@ -258,7 +271,9 @@ public final class DateUtil {
 	}
 
 	public static String toLongDateTimeString(Date date, Locale locale) {
-		return DateFormat.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale).format(date);
+		return DateFormat
+				.getDateTimeInstance(DateFormat.LONG, DateFormat.LONG, locale)
+				.format(date);
 	}
 
 	public static String toLongDateTimeString(Date date) {
@@ -266,7 +281,9 @@ public final class DateUtil {
 	}
 
 	public static String toMediumDateTimeString(Date date, Locale locale) {
-		return DateFormat.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM).format(date);
+		return DateFormat
+				.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM)
+				.format(date);
 	}
 
 	public static String toMediumDateTimeString(Date date) {
@@ -274,7 +291,9 @@ public final class DateUtil {
 	}
 
 	public static String toShortDateTimeString(Date date, Locale locale) {
-		return DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT).format(date);
+		return DateFormat
+				.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+				.format(date);
 	}
 
 	public static String toShortDateTimeString(Date date) {
@@ -321,6 +340,30 @@ public final class DateUtil {
 		return toShortTimeString(date, Locale.getDefault());
 	}
 
+	public static String toISODateTimeString(Date date, Locale locale) {
+		return new SimpleDateFormat(ISO_DATETIME_FORMAT_EXTENDED, locale).format(date);
+	}
+
+	public static String toISODateTimeString(Date date) {
+		return toISODateTimeString(date, Locale.getDefault());
+	}
+
+	public static String toISODateString(Date date, Locale locale) {
+		return new SimpleDateFormat(ISO_DATE_FORMAT_EXTENDED, locale).format(date);
+	}
+
+	public static String toISODateString(Date date) {
+		return toISODateString(date, Locale.getDefault());
+	}
+
+	public static String toISOTimeString(Date date, Locale locale) {
+		return new SimpleDateFormat(ISO_TIME_FORMAT_EXTENDED, locale).format(date);
+	}
+
+	public static String toISOTimeString(Date date) {
+		return toISOTimeString(date, Locale.getDefault());
+	}
+
 	public static String toString(Date date, String format, Locale locale) {
 		return new SimpleDateFormat(format, locale).format(date);
 	}
@@ -331,8 +374,21 @@ public final class DateUtil {
 
 	public static Date parseDate(String value, Locale locale) throws ParseException {
 		int[] styles = { DateFormat.SHORT, DateFormat.MEDIUM, DateFormat.LONG };
-		DateFormat[] dateFormats = new DateFormat[styles.length * (styles.length + 2)];
+		DateFormat[] dateFormats = new DateFormat[12 + styles.length * (styles.length + 2)];
 		int index = 0, errorOffset = 0;
+
+		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_EXTENDED);
+		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_EXTENDED_ALT);
+		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_EXTENDED_UTC);
+		dateFormats[index++] = new SimpleDateFormat(ISO_DATE_FORMAT_EXTENDED);
+		dateFormats[index++] = new SimpleDateFormat(ISO_TIME_FORMAT_EXTENDED);
+		dateFormats[index++] = new SimpleDateFormat(ISO_TIME_FORMAT_EXTENDED_UTC);
+		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_BASIC);
+		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_BASIC_ALT);
+		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_BASIC_UTC);
+		dateFormats[index++] = new SimpleDateFormat(ISO_DATE_FORMAT_BASIC);
+		dateFormats[index++] = new SimpleDateFormat(ISO_TIME_FORMAT_BASIC);
+		dateFormats[index++] = new SimpleDateFormat(ISO_TIME_FORMAT_BASIC_UTC);
 		
 		for (int style1 : styles) {
 			dateFormats[index++] = DateFormat.getDateInstance(style1, locale);
@@ -345,14 +401,14 @@ public final class DateUtil {
 		for (DateFormat dateFormat : dateFormats) {
 			try {
 				return dateFormat.parse(value);
-			} catch (ParseException pex) {
-				if (pex.getErrorOffset() > errorOffset) {
-					errorOffset = pex.getErrorOffset();
+			} catch (ParseException e) {
+				if (e.getErrorOffset() > errorOffset) {
+					errorOffset = e.getErrorOffset();
 				}
 			}
 		}
 
-		throw new ParseException("Could not parse " + value + " as a date", errorOffset);
+		throw new ParseException("Could not parse '" + value + "' as a date", errorOffset);
 	}
 
 	public static Date parseDate(String value) throws ParseException {

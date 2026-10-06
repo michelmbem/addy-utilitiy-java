@@ -126,6 +126,7 @@ class DateUtilTest {
         assertEquals("22 h 15 min 30 s HAE", DateUtil.toLongTimeString(date, Locale.FRANCE));
         assertEquals("22 h 15", DateUtil.toShortTimeString(date, Locale.US));
         assertEquals("03/07/2024 22:15:30", DateUtil.toString(date, "dd/MM/yyyy HH:mm:ss"));
+        assertEquals("2024-07-03T22:15:30", DateUtil.toISODateTimeString(date));
     }
 
     @Test
@@ -133,5 +134,7 @@ class DateUtilTest {
         Date date = DateUtil.date(2002, 2, 19);
         assertEquals(date, DateUtil.parseDate("2002-02-19", Locale.CANADA_FRENCH));
         assertEquals(date, DateUtil.parseDate("19/02/2002", Locale.FRANCE));
+        assertEquals(date, DateUtil.parseDate("2002-02-19"));
+        assertEquals(date, DateUtil.parseDate("2002-02-19T00:00:00Z"));
     }
 }
