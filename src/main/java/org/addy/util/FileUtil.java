@@ -56,6 +56,40 @@ public final class FileUtil {
         return null;
     }
 
+    public static String getExtensionFromContentType(String contentType) {
+        if (StringUtil.isBlank(contentType)) return null;
+
+        String normalized = contentType.split(";", 2)[0].trim().toLowerCase();
+        return switch (normalized) {
+            case "application/pdf" -> ".pdf";
+            case "application/json" -> ".json";
+            case "application/xml" -> ".xml";
+            case "application/zip" -> ".zip";
+            case "application/gzip" -> ".gz";
+            case "text/plain" -> ".txt";
+            case "text/html" -> ".html";
+            case "text/css" -> ".css";
+            case "text/javascript" -> ".js";
+            case "text/csv" -> ".csv";
+            case "image/jpeg" -> ".jpg";
+            case "image/png" -> ".png";
+            case "image/gif" -> ".gif";
+            case "image/webp" -> ".webp";
+            case "image/svg+xml" -> ".svg";
+            case "image/bmp" -> ".bmp";
+            case "audio/mpeg" -> ".mp3";
+            case "audio/wav" -> ".wav";
+            case "video/mp4" -> ".mp4";
+            case "application/msword" -> ".doc";
+            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> ".docx";
+            case "application/vnd.ms-excel" -> ".xls";
+            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" -> ".xlsx";
+            case "application/vnd.ms-powerpoint" -> ".ppt";
+            case "application/vnd.openxmlformats-officedocument.presentationml.presentation" -> ".pptx";
+            default -> null;
+        };
+    }
+
     public static String getContentType(File file) throws IOException {
         String contentType = Files.probeContentType(file.toPath());
         if (contentType == null && file.isFile()) {
@@ -96,10 +130,15 @@ public final class FileUtil {
         return (new File(source)).renameTo(new File(dest));
     }
 
-    public static int copyStream(InputStream input, OutputStream output) throws IOException {
-        var buffer = new byte[1024];
-        int total = 0;
-        int amount;
+    public static int copyStream(InputStream input, OutputStream output, int bufferSize)
+            throws IOException {
+
+        if (input == null) throw new IllegalArgumentException("The input stream cannot be null");
+        if (output == null) throw new IllegalArgumentException("The output stream cannot be null");
+        if (bufferSize <= 0) throw new IllegalArgumentException("The buffer size should be positive");
+
+        var buffer = new byte[bufferSize];
+        int amount, total = 0;
 
         while ((amount = input.read(buffer)) > 0) {
             output.write(buffer, 0, amount);
@@ -107,6 +146,10 @@ public final class FileUtil {
         }
 
         return total;
+    }
+
+    public static int copyStream(InputStream input, OutputStream output) throws IOException {
+        return copyStream(input, output, 2048);
     }
 
     public static boolean copy(File sourceFile, File destFile) throws IOException {
@@ -162,8 +205,7 @@ public final class FileUtil {
     public static void walkTree(File rootNode, FileFilter filter, TreeWalker treeWalker) {
         if (rootNode.isDirectory()) {
             if (treeWalker.beforeEnteringDirectory(rootNode)) {
-                File[] childNodes = rootNode.listFiles(filter);
-                for (File childNode : childNodes) {
+                for (File childNode : rootNode.listFiles(filter)) {
                     walkTree(childNode, filter, treeWalker);
                 }
                 treeWalker.afterExitingDirectory(rootNode);
@@ -355,8 +397,7 @@ public final class FileUtil {
             return true;
         }
 
-        default void afterExitingDirectory(File node) {
-        }
+        default void afterExitingDirectory(File node) {}
     }
 
     public static class PatternFilter implements FileFilter {
