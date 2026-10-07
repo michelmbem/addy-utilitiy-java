@@ -1,7 +1,5 @@
 package org.addy.util;
 
-import org.apache.commons.lang3.ClassUtils;
-
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -14,11 +12,11 @@ import java.util.Date;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
-public final class TypeConverter {
+public final class ValueConverter {
     private static final ZoneId DEFAULT_ZONE_ID = ZoneId.systemDefault();
     private static final ZoneOffset DEFAULT_ZONE_OFFSET = OffsetTime.now(DEFAULT_ZONE_ID).getOffset();
     
-    private TypeConverter() {}
+    private ValueConverter() {}
 
     public static boolean toBoolean(Object value) {
         if (value == null) return false;
@@ -50,6 +48,7 @@ public final class TypeConverter {
         if (value instanceof Character chr) return (byte) chr.charValue();
         if (value instanceof Number number) return number.byteValue();
         if (value instanceof CharSequence) return Byte.parseByte(value.toString());
+        if (value instanceof Enum<?> en) return (byte) en.ordinal();
         return convertByIntrospection(value, byte.class);
     }
 
@@ -59,6 +58,7 @@ public final class TypeConverter {
         if (value instanceof Character chr) return (short) chr.charValue();
         if (value instanceof Number number) return number.shortValue();
         if (value instanceof CharSequence) return Short.parseShort(value.toString());
+        if (value instanceof Enum<?> en) return (short) en.ordinal();
         return convertByIntrospection(value, short.class);
     }
 
@@ -68,6 +68,7 @@ public final class TypeConverter {
         if (value instanceof Character chr) return chr;
         if (value instanceof Number number) return number.intValue();
         if (value instanceof CharSequence) return Integer.parseInt(value.toString());
+        if (value instanceof Enum<?> en) return en.ordinal();
         return convertByIntrospection(value, int.class);
     }
 
@@ -77,6 +78,7 @@ public final class TypeConverter {
         if (value instanceof Character chr) return chr;
         if (value instanceof Number number) return number.longValue();
         if (value instanceof CharSequence) return Long.parseLong(value.toString());
+        if (value instanceof Enum<?> en) return en.ordinal();
         return convertByIntrospection(value, long.class);
     }
 
@@ -86,6 +88,7 @@ public final class TypeConverter {
         if (value instanceof Character chr) return chr;
         if (value instanceof Number number) return number.floatValue();
         if (value instanceof CharSequence) return Float.parseFloat(value.toString());
+        if (value instanceof Enum<?> en) return en.ordinal();
         return convertByIntrospection(value, float.class);
     }
 
@@ -95,6 +98,7 @@ public final class TypeConverter {
         if (value instanceof Character chr) return chr;
         if (value instanceof Number number) return number.doubleValue();
         if (value instanceof CharSequence) return Double.parseDouble(value.toString());
+        if (value instanceof Enum<?> en) return en.ordinal();
         return convertByIntrospection(value, double.class);
     }
 
@@ -103,21 +107,22 @@ public final class TypeConverter {
         if (value instanceof Boolean) return (boolean) value ? BigInteger.ONE : BigInteger.ZERO;
         if (value instanceof Character chr) return BigInteger.valueOf(chr);
         if (value instanceof Number number) return BigInteger.valueOf(number.longValue());
+        if (value instanceof Enum<?> en) return BigInteger.valueOf(en.ordinal());
         return convertByIntrospection(value, BigInteger.class);
     }
 
     public static BigDecimal toBigDecimal(Object value) {
         if (value == null || value instanceof BigDecimal) return (BigDecimal) value;
-        if (value instanceof BigInteger bi) return new BigDecimal(bi);
+        if (value instanceof BigInteger bi) return new BigDecimal(bi); // to prevent the case of 'value instanceof Number'
         if (value instanceof Boolean) return (boolean) value ? BigDecimal.ONE : BigDecimal.ZERO;
         if (value instanceof Character chr) return BigDecimal.valueOf(chr);
         if (value instanceof Number number) return BigDecimal.valueOf(number.doubleValue());
+        if (value instanceof Enum<?> en) return BigDecimal.valueOf(en.ordinal());
         return convertByIntrospection(value, BigDecimal.class);
     }
 
     public static Date toDate(Object value) {
         if (value == null || value instanceof Date) return (Date) value;
-        if (value instanceof Instant instant) return Date.from(instant);
         if (value instanceof ZonedDateTime zdt) return Date.from(zdt.toInstant());
         if (value instanceof OffsetDateTime odt) return Date.from(odt.toInstant());
 
@@ -205,30 +210,38 @@ public final class TypeConverter {
         return convertByIntrospection(value, LocalTime.class);
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T extends Enum<T>> T toEnum(Class<T> enumType, Object value) {
+        if (value == null || value.getClass() == enumType) return (T) value;
+        if (value instanceof Number number) return enumType.getEnumConstants()[number.intValue()];
+        if (value instanceof CharSequence) return Enum.valueOf(enumType, value.toString());
+        return convertByIntrospection(value, enumType);
+    }
+
+    @SuppressWarnings("unchecked")
     public static Object toType(Object value, Class<?> targetType) {
-        targetType = box(targetType);
-        if (targetType == Boolean.class) return toBoolean(value);
-        if (targetType == Character.class) return toChar(value);
-        if (targetType == Byte.class) return toByte(value);
-        if (targetType == Short.class) return toShort(value);
-        if (targetType == Integer.class) return toInt(value);
-        if (targetType == Long.class) return toLong(value);
-        if (targetType == Float.class) return toFloat(value);
-        if (targetType == Double.class) return toDouble(value);
-        if (targetType == BigInteger.class) return toBigInteger(value);
-        if (targetType == BigDecimal.class) return toBigDecimal(value);
-        if (targetType == Date.class) return toDate(value);
-        if (targetType == Instant.class) return toInstant(value);
-        if (targetType == ZonedDateTime.class) return toZonedDateTime(value);
-        if (targetType == OffsetDateTime.class) return toOffsetDateTime(value);
-        if (targetType == LocalDateTime.class) return toLocalDateTime(value);
-        if (targetType == LocalDate.class) return toLocalDate(value);
-        if (targetType == OffsetTime.class) return toOffsetTime(value);
-        if (targetType == LocalTime.class) return toLocalTime(value);
-        if (targetType == String.class) return String.valueOf(value);
-        if (value == null || targetType.isAssignableFrom(value.getClass())) return value;
-        if (targetType.isEnum() && (value instanceof Character || value instanceof CharSequence))
-            return Enum.valueOf((Class<? extends Enum>) targetType, value.toString());
+        Class<?> boxedType = TypeUtil.box(targetType);
+        if (boxedType == Boolean.class) return toBoolean(value);
+        if (boxedType == Character.class) return toChar(value);
+        if (boxedType == Byte.class) return toByte(value);
+        if (boxedType == Short.class) return toShort(value);
+        if (boxedType == Integer.class) return toInt(value);
+        if (boxedType == Long.class) return toLong(value);
+        if (boxedType == Float.class) return toFloat(value);
+        if (boxedType == Double.class) return toDouble(value);
+        if (boxedType == BigInteger.class) return toBigInteger(value);
+        if (boxedType == BigDecimal.class) return toBigDecimal(value);
+        if (boxedType == Date.class) return toDate(value);
+        if (boxedType == Instant.class) return toInstant(value);
+        if (boxedType == ZonedDateTime.class) return toZonedDateTime(value);
+        if (boxedType == OffsetDateTime.class) return toOffsetDateTime(value);
+        if (boxedType == LocalDateTime.class) return toLocalDateTime(value);
+        if (boxedType == LocalDate.class) return toLocalDate(value);
+        if (boxedType == OffsetTime.class) return toOffsetTime(value);
+        if (boxedType == LocalTime.class) return toLocalTime(value);
+        if (boxedType == String.class) return String.valueOf(value);
+        if (boxedType.isEnum()) return toEnum((Class<? extends Enum>) boxedType, value);
+        if (value == null || boxedType.isAssignableFrom(value.getClass())) return value;
         return convertByIntrospection(value, targetType);
     }
 
@@ -243,11 +256,12 @@ public final class TypeConverter {
         throw new ClassCastException("Could not cast " + value + " to " + targetType);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> boolean constructed(Class<T> targetType, Object value, Reference<T> ref) {
         Constructor<?> constructor = Stream.of(targetType.getConstructors())
                 .filter(c -> Modifier.isPublic(c.getModifiers()) &&
                         c.getParameterTypes().length == 1 &&
-                        ClassUtils.isAssignable(value.getClass(), c.getParameterTypes()[0], true))
+                        TypeUtil.isAssignable(value.getClass(), c.getParameterTypes()[0]))
                 .findFirst()
                 .orElse(null);
 
@@ -263,13 +277,14 @@ public final class TypeConverter {
         return false;
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> boolean factored(Class<T> targetType, Object value, Reference<T> ref) {
         Method factoryMethod = Stream.of(targetType.getMethods())
                 .filter(m -> Modifier.isPublic(m.getModifiers()) &&
                         Modifier.isStatic(m.getModifiers()) &&
-                        ClassUtils.isAssignable(m.getReturnType(), targetType, true) &&
+                        TypeUtil.isAssignable(m.getReturnType(), targetType) &&
                         m.getParameterTypes().length == 1 &&
-                        ClassUtils.isAssignable(value.getClass(), m.getParameterTypes()[0], true))
+                        TypeUtil.isAssignable(value.getClass(), m.getParameterTypes()[0]))
                 .findFirst()
                 .orElse(null);
 
@@ -289,6 +304,7 @@ public final class TypeConverter {
         return (value instanceof CharSequence) && factored(targetType, value.toString(), ref);
     }
 
+    @SuppressWarnings("unchecked")
     private static <T> boolean converted(Class<T> targetType, Object value, Reference<T> ref) {
         Pattern converterMethodName = Pattern.compile(
                 String.format("^(to|as|get)%s$", targetType.getSimpleName()),
@@ -313,18 +329,5 @@ public final class TypeConverter {
         }
 
         return false;
-    }
-
-    private static Class<?> box(Class<?> type) {
-        if (!type.isPrimitive()) return type;
-        if (type == boolean.class) return Boolean.class;
-        if (type == char.class) return Character.class;
-        if (type == byte.class) return Byte.class;
-        if (type == short.class) return Short.class;
-        if (type == int.class) return Integer.class;
-        if (type == long.class) return Long.class;
-        if (type == float.class) return Float.class;
-        if (type == double.class) return Double.class;
-        throw new IllegalArgumentException("Could not find a boxed version of " + type.getName());
     }
 }
