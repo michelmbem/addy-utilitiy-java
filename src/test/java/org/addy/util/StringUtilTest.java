@@ -5,6 +5,7 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.Arrays;
+import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -49,6 +50,36 @@ class StringUtilTest {
         assertTrue(StringUtil.isBlank(" "));
         assertTrue(StringUtil.isBlank("\t\f\r\n"));
         assertFalse(StringUtil.isBlank("Hello"));
+    }
+
+    @Test
+    void isNumericWorks() {
+        assertFalse(StringUtil.isNumeric(null));
+        assertFalse(StringUtil.isNumeric(""));
+        assertFalse(StringUtil.isNumeric(" "));
+        assertTrue(StringUtil.isNumeric("1982"));
+        assertTrue(StringUtil.isNumeric("-725.83"));
+        assertTrue(StringUtil.isNumeric("17.5e-33"));
+        assertTrue(StringUtil.isNumeric(".314E+1"));
+    }
+
+    @Test
+    void isTemporalWorks() {
+        assertFalse(StringUtil.isTemporal(null));
+        assertFalse(StringUtil.isTemporal(""));
+        assertFalse(StringUtil.isTemporal(" "));
+        assertTrue(StringUtil.isTemporal("1982-02-28"));
+        assertTrue(StringUtil.isTemporal("2025-11-21T18:30:52Z"));
+        assertTrue(StringUtil.isTemporal("14:19:05"));
+        assertTrue(StringUtil.isTemporal("20070817"));
+        assertTrue(StringUtil.isTemporal("July 3, 2024 at 10:15:30 PM EDT", Locale.US));
+        assertTrue(StringUtil.isTemporal("3 juill. 2024, 22 h 15 min 30 s", Locale.CANADA_FRENCH));
+        assertTrue(StringUtil.isTemporal("7/3/24, 10:15 PM", Locale.US));
+        assertTrue(StringUtil.isTemporal("3 juillet 2024", Locale.FRANCE));
+        assertTrue(StringUtil.isTemporal("3 juill. 2024", Locale.CANADA_FRENCH));
+        assertTrue(StringUtil.isTemporal("7/3/24", Locale.US));
+        assertTrue(StringUtil.isTemporal("22:15:30 EDT", Locale.FRANCE));
+        assertTrue(StringUtil.isTemporal("10:15 PM", Locale.US));
     }
 
     @Test

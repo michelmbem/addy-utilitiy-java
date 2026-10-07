@@ -282,7 +282,7 @@ public final class DateUtil {
 
 	public static String toMediumDateTimeString(Date date, Locale locale) {
 		return DateFormat
-				.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM)
+				.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale)
 				.format(date);
 	}
 
@@ -292,7 +292,7 @@ public final class DateUtil {
 
 	public static String toShortDateTimeString(Date date, Locale locale) {
 		return DateFormat
-				.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+				.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT, locale)
 				.format(date);
 	}
 
@@ -301,7 +301,7 @@ public final class DateUtil {
 	}
 
 	public static String toLongDateString(Date date, Locale locale) {
-		return DateFormat.getDateInstance(DateFormat.LONG).format(date);
+		return DateFormat.getDateInstance(DateFormat.LONG, locale).format(date);
 	}
 
 	public static String toLongDateString(Date date) {
@@ -309,7 +309,7 @@ public final class DateUtil {
 	}
 
 	public static String toMediumDateString(Date date, Locale locale) {
-		return DateFormat.getDateInstance(DateFormat.MEDIUM).format(date);
+		return DateFormat.getDateInstance(DateFormat.MEDIUM, locale).format(date);
 	}
 
 	public static String toMediumDateString(Date date) {
@@ -317,7 +317,7 @@ public final class DateUtil {
 	}
 
 	public static String toShortDateString(Date date, Locale locale) {
-		return DateFormat.getDateInstance(DateFormat.SHORT).format(date);
+		return DateFormat.getDateInstance(DateFormat.SHORT, locale).format(date);
 	}
 
 	public static String toShortDateString(Date date) {
@@ -325,7 +325,7 @@ public final class DateUtil {
 	}
 
 	public static String toLongTimeString(Date date, Locale locale) {
-		return DateFormat.getTimeInstance(DateFormat.LONG).format(date);
+		return DateFormat.getTimeInstance(DateFormat.LONG, locale).format(date);
 	}
 
 	public static String toLongTimeString(Date date) {
@@ -333,7 +333,7 @@ public final class DateUtil {
 	}
 
 	public static String toShortTimeString(Date date, Locale locale) {
-		return DateFormat.getTimeInstance(DateFormat.SHORT).format(date);
+		return DateFormat.getTimeInstance(DateFormat.SHORT, locale).format(date);
 	}
 
 	public static String toShortTimeString(Date date) {

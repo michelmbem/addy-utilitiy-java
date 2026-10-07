@@ -119,12 +119,12 @@ class DateUtilTest {
         Date date = DateUtil.dateTime(2024, 7, 3, 22, 15, 30);
         assertEquals("July 3, 2024 at 10:15:30 PM EDT", DateUtil.toLongDateTimeString(date, Locale.US));
         assertEquals("3 juill. 2024, 22 h 15 min 30 s", DateUtil.toMediumDateTimeString(date, Locale.CANADA_FRENCH));
-        assertEquals("2024-07-03 22 h 15", DateUtil.toShortDateTimeString(date, Locale.US));
+        assertEquals("7/3/24, 10:15 PM", DateUtil.toShortDateTimeString(date, Locale.US));
         assertEquals("3 juillet 2024", DateUtil.toLongDateString(date, Locale.FRANCE));
         assertEquals("3 juill. 2024", DateUtil.toMediumDateString(date, Locale.CANADA_FRENCH));
-        assertEquals("2024-07-03", DateUtil.toShortDateString(date, Locale.US));
-        assertEquals("22 h 15 min 30 s HAE", DateUtil.toLongTimeString(date, Locale.FRANCE));
-        assertEquals("22 h 15", DateUtil.toShortTimeString(date, Locale.US));
+        assertEquals("7/3/24", DateUtil.toShortDateString(date, Locale.US));
+        assertEquals("22:15:30 EDT", DateUtil.toLongTimeString(date, Locale.FRANCE));
+        assertEquals("10:15 PM", DateUtil.toShortTimeString(date, Locale.US));
         assertEquals("03/07/2024 22:15:30", DateUtil.toString(date, "dd/MM/yyyy HH:mm:ss"));
         assertEquals("2024-07-03T22:15:30", DateUtil.toISODateTimeString(date));
     }

@@ -1,6 +1,9 @@
 package org.addy.util;
 
+import java.math.BigDecimal;
 import java.text.Normalizer;
+import java.text.ParseException;
+import java.util.Locale;
 import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
@@ -21,6 +24,32 @@ public final class StringUtil {
 
 	public static boolean isBlank(String value) {
 		return value == null || value.isBlank();
+	}
+
+	public static boolean isNumeric(String value) {
+		if (value == null) return false;
+
+		try {
+			new BigDecimal(value);
+			return true;
+		} catch (NumberFormatException e) {
+			return false;
+		}
+	}
+
+	public static boolean isTemporal(String value, Locale locale) {
+		if (value == null) return false;
+
+		try {
+			DateUtil.parseDate(value, locale);
+			return true;
+		} catch (ParseException e) {
+			return false;
+		}
+	}
+
+	public static boolean isTemporal(String value) {
+		return isTemporal(value, Locale.getDefault());
 	}
 
 	public static String padLeft(String value, int length, char padding) {
