@@ -15,18 +15,31 @@ public final class DateUtil {
 	public static final int SECONDS_PER_HOUR = 3600;
 	public static final int SECONDS_PER_DAY = 86400;
 
-	public static String ISO_DATETIME_FORMAT_EXTENDED = "yyyy-MM-dd'T'HH:mm:ss";
-	public static String ISO_DATETIME_FORMAT_EXTENDED_ALT = "yyyy-MM-dd HH:mm:ss";
-	public static String ISO_DATETIME_FORMAT_EXTENDED_UTC = "yyyy-MM-dd'T'HH:mm:ss'Z'";
-	public static String ISO_DATE_FORMAT_EXTENDED = "yyyy-MM-dd";
-	public static String ISO_TIME_FORMAT_EXTENDED = "HH:mm:ss";
-	public static String ISO_TIME_FORMAT_EXTENDED_UTC = "HH:mm:ss'Z'";
-	public static String ISO_DATETIME_FORMAT_BASIC = "yyyyMMdd'T'HHmmss";
-	public static String ISO_DATETIME_FORMAT_BASIC_ALT = "yyyyMMddHHmmss";
-	public static String ISO_DATETIME_FORMAT_BASIC_UTC = "yyyyMMdd'T'HHmmss'Z'";
-	public static String ISO_DATE_FORMAT_BASIC = "yyyyMMdd";
-	public static String ISO_TIME_FORMAT_BASIC = "HHmmss";
-	public static String ISO_TIME_FORMAT_BASIC_UTC = "HHmmss'Z'";
+	public static final class IsoFormat {
+		private IsoFormat() {}
+
+		public static final class Basic {
+			private Basic() {}
+
+			public static String DATETIME = "yyyyMMdd'T'HHmmss";
+			public static String DATETIME_ALT = "yyyyMMddHHmmss";
+			public static String DATETIME_UTC = DATETIME + 'Z';
+			public static String DATE = "yyyyMMdd";
+			public static String TIME = "HHmmss";
+			public static String TIME_UTC = TIME + 'Z';
+		}
+
+		public static final class Extended {
+			private Extended() {}
+
+			public static String DATETIME = "yyyy-MM-dd'T'HH:mm:ss";
+			public static String DATETIME_ALT = "yyyy-MM-dd HH:mm:ss";
+			public static String DATETIME_UTC = DATETIME + 'Z';
+			public static String DATE = "yyyy-MM-dd";
+			public static String TIME = "HH:mm:ss";
+			public static String TIME_UTC = TIME + 'Z';
+		}
+	}
 
 	private DateUtil() {}
 
@@ -342,7 +355,7 @@ public final class DateUtil {
 	}
 
 	public static String toISODateTimeString(Date date, Locale locale) {
-		return new SimpleDateFormat(ISO_DATETIME_FORMAT_EXTENDED, locale).format(date);
+		return new SimpleDateFormat(IsoFormat.Extended.DATETIME, locale).format(date);
 	}
 
 	public static String toISODateTimeString(Date date) {
@@ -350,7 +363,7 @@ public final class DateUtil {
 	}
 
 	public static String toISODateString(Date date, Locale locale) {
-		return new SimpleDateFormat(ISO_DATE_FORMAT_EXTENDED, locale).format(date);
+		return new SimpleDateFormat(IsoFormat.Extended.DATE, locale).format(date);
 	}
 
 	public static String toISODateString(Date date) {
@@ -358,7 +371,7 @@ public final class DateUtil {
 	}
 
 	public static String toISOTimeString(Date date, Locale locale) {
-		return new SimpleDateFormat(ISO_TIME_FORMAT_EXTENDED, locale).format(date);
+		return new SimpleDateFormat(IsoFormat.Extended.TIME, locale).format(date);
 	}
 
 	public static String toISOTimeString(Date date) {
@@ -378,18 +391,18 @@ public final class DateUtil {
 		DateFormat[] dateFormats = new DateFormat[12 + styles.length * (styles.length + 2)];
 		int index = 0, errorOffset = 0;
 
-		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_EXTENDED);
-		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_EXTENDED_ALT);
-		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_EXTENDED_UTC);
-		dateFormats[index++] = new SimpleDateFormat(ISO_DATE_FORMAT_EXTENDED);
-		dateFormats[index++] = new SimpleDateFormat(ISO_TIME_FORMAT_EXTENDED);
-		dateFormats[index++] = new SimpleDateFormat(ISO_TIME_FORMAT_EXTENDED_UTC);
-		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_BASIC);
-		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_BASIC_ALT);
-		dateFormats[index++] = new SimpleDateFormat(ISO_DATETIME_FORMAT_BASIC_UTC);
-		dateFormats[index++] = new SimpleDateFormat(ISO_DATE_FORMAT_BASIC);
-		dateFormats[index++] = new SimpleDateFormat(ISO_TIME_FORMAT_BASIC);
-		dateFormats[index++] = new SimpleDateFormat(ISO_TIME_FORMAT_BASIC_UTC);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.DATETIME);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.DATETIME_ALT);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.DATETIME_UTC);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.DATE);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.TIME);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.TIME_UTC);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.DATETIME);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.DATETIME_ALT);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.DATETIME_UTC);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.DATE);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.TIME);
+		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.TIME_UTC);
 		
 		for (int style1 : styles) {
 			dateFormats[index++] = DateFormat.getDateInstance(style1, locale);
