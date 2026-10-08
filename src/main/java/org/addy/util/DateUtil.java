@@ -33,7 +33,8 @@ public final class DateUtil {
 	public static Date dateTime(int year, int month, int day, int hour, int minute, int second) {
 		if (year < 1) throw new IllegalArgumentException("The year must be greater than or equal to 1");
 		if (month < 1 || month > 12) throw new IllegalArgumentException("The month must be between 1 and 12");
-		if (day < 1 || day > getLastDayOfMonth(month, year)) throw new IllegalArgumentException("The day must be between 1 and the last day of the month");
+		if (day < 1 || day > getLastDayOfMonth(month, year))
+			throw new IllegalArgumentException("The day must be between 1 and the last day of the month");
 		if (hour < 0 || hour > 23) throw new IllegalArgumentException("The hour must be between 0 and 23");
 		if (minute < 0 || minute > 59) throw new IllegalArgumentException("The minute must be between 0 and 59");
 		if (second < 0 || second > 59) throw new IllegalArgumentException("The second must be between 0 and 59");

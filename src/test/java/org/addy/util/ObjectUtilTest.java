@@ -17,6 +17,7 @@ class ObjectUtilTest {
         assertThat(ObjectUtil.isEmpty(List.of())).isTrue();
         assertThat(ObjectUtil.isEmpty(Set.of())).isTrue();
         assertThat(ObjectUtil.isEmpty(Map.of())).isTrue();
+        assertThat(ObjectUtil.isEmpty(new Wrapper())).isTrue();
 
         assertThat(ObjectUtil.isEmpty(" ")).isFalse();
         assertThat(ObjectUtil.isEmpty("hello")).isFalse();
@@ -25,6 +26,7 @@ class ObjectUtilTest {
         assertThat(ObjectUtil.isEmpty(List.of(0, 1, 2))).isFalse();
         assertThat(ObjectUtil.isEmpty(Set.of('a', 'b', 'c'))).isFalse();
         assertThat(ObjectUtil.isEmpty(Map.of(1, "one", 2, "two"))).isFalse();
+        assertThat(ObjectUtil.isEmpty(new Wrapper(new Date()))).isFalse();
     }
 
     @Test
@@ -71,5 +73,15 @@ class ObjectUtilTest {
                 .isEqualTo(Set.of('a', 'b', 'c'));
         assertThat(ObjectUtil.requireNonEmptyElse(Map.of(1, "one", 2, "two"), Map.of(0, "zero")))
                 .isEqualTo(Map.of(1, "one", 2, "two"));
+    }
+
+    record Wrapper(Object value) {
+        public Wrapper() {
+            this(null);
+        }
+
+        public boolean isEmpty() {
+            return value == null;
+        }
     }
 }

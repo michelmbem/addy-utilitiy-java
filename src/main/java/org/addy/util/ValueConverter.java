@@ -247,11 +247,10 @@ public final class ValueConverter {
 
     private static <T> T convertByIntrospection(Object value, Class<T> targetType) {
         Reference<T> ref = new Reference<>();
-
         if (constructed(targetType, value, ref) ||
                 factored(targetType, value, ref) ||
-                parsed(targetType, value, ref) ||
-                converted(targetType, value, ref)) return ref.getTarget();
+                converted(targetType, value, ref))
+            return ref.getTarget();
 
         throw new ClassCastException("Could not cast " + value + " to " + targetType);
     }
@@ -269,8 +268,9 @@ public final class ValueConverter {
             try {
                 ref.setTarget((T) constructor.newInstance(value));
                 return true;
-            } catch (InvocationTargetException | InstantiationException | IllegalAccessException e) {
-                return false;
+            } catch (InvocationTargetException |
+                     InstantiationException |
+                     IllegalAccessException ignored) {
             }
         }
 
@@ -293,15 +293,10 @@ public final class ValueConverter {
                 ref.setTarget((T) factoryMethod.invoke(null, value));
                 return true;
             } catch (IllegalAccessException | InvocationTargetException ignored) {
-                return false;
             }
         }
 
         return false;
-    }
-
-    private static <T> boolean parsed(Class<T> targetType, Object value, Reference<T> ref) {
-        return (value instanceof CharSequence) && factored(targetType, value.toString(), ref);
     }
 
     @SuppressWarnings("unchecked")
@@ -324,7 +319,6 @@ public final class ValueConverter {
                 ref.setTarget((T) converterMethod.invoke(value));
                 return true;
             } catch (IllegalAccessException | InvocationTargetException ignored) {
-                return false;
             }
         }
 
