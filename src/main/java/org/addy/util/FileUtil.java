@@ -4,6 +4,7 @@ import java.io.*;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -232,6 +233,10 @@ public final class FileUtil {
 
     public static BufferedReader openText(String path) throws FileNotFoundException {
         return new BufferedReader(new FileReader(path));
+    }
+
+    public static Scanner openScanner(String path) throws FileNotFoundException {
+        return new Scanner(openText(path));
     }
 
     public static PrintWriter createText(String path) throws IOException {

@@ -6,12 +6,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Set;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class FileUtilTest {
 	private static final File file1 = new File("files/image-from-pexels.jpg");
@@ -133,33 +129,6 @@ class FileUtilTest {
 		assertEquals(10, fileList.size());
 		assertTrue(fileList.contains(file1.getPath()));
 		assertTrue(fileList.contains(file4.getPath()));
-	}
-
-	//@Test
-	void deleteDotGitAndDotVSDirs() {
-		List<String> fileList = new LinkedList<>();
-		var dirToDelete = Set.of(".git", ".vs", "bin", "obj", "Debug", "Release", "Win32", "x64");
-		var codeDir = new File("C:\\Users\\mbem_\\source\\local");
-		var cleaner = new FileUtil.TreeWalker() {
-
-			@Override
-			public boolean beforeEnteringDirectory(File node) {
-				if (node.isDirectory() && dirToDelete.contains(node.getName())) {
-					FileUtil.delete(node);
-					fileList.add(node.getPath());
-					return false;
-				}
-
-				return true;
-			}
-
-			@Override
-			public void onLeaf(File node) {}
-		};
-
-		FileUtil.walkTree(codeDir, file -> true, cleaner);
-
-		assertFalse(fileList.isEmpty());
 	}
 
 	@Test
