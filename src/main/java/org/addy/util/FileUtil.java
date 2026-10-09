@@ -8,8 +8,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public final class FileUtil {
-    private FileUtil() {
-    }
+    private FileUtil() {}
 
     public static boolean exists(String path) {
         return (new File(path)).exists();
@@ -149,7 +148,7 @@ public final class FileUtil {
     }
 
     public static int copyStream(InputStream input, OutputStream output) throws IOException {
-        return copyStream(input, output, 2048);
+        return copyStream(input, output, 8192);
     }
 
     public static boolean copy(File sourceFile, File destFile) throws IOException {
@@ -219,28 +218,28 @@ public final class FileUtil {
         walkTree(new File(rootPath), filter, treeWalker);
     }
 
-    public static InputStream open(String path) throws FileNotFoundException {
+    public static FileInputStream open(String path) throws FileNotFoundException {
         return new FileInputStream(path);
     }
 
-    public static OutputStream create(String path) throws FileNotFoundException {
+    public static FileOutputStream create(String path) throws FileNotFoundException {
         return new FileOutputStream(path, false);
     }
 
-    public static OutputStream append(String path) throws FileNotFoundException {
+    public static FileOutputStream append(String path) throws FileNotFoundException {
         return new FileOutputStream(path, true);
     }
 
     public static BufferedReader openText(String path) throws FileNotFoundException {
-        return new BufferedReader(new InputStreamReader(new FileInputStream(path)));
+        return new BufferedReader(new FileReader(path));
     }
 
-    public static PrintWriter createText(String path) throws FileNotFoundException {
-        return new PrintWriter(new OutputStreamWriter(new FileOutputStream(path, false)), true);
+    public static PrintWriter createText(String path) throws IOException {
+        return new PrintWriter(new BufferedWriter(new FileWriter(path, false)), true);
     }
 
-    public static PrintWriter appendText(String path) throws FileNotFoundException {
-        return new PrintWriter(new OutputStreamWriter(new FileOutputStream(path, true)), true);
+    public static PrintWriter appendText(String path) throws IOException {
+        return new PrintWriter(new BufferedWriter(new FileWriter(path, true)), true);
     }
 
     public static byte[] readAllBytes(InputStream input) throws IOException {
@@ -344,12 +343,14 @@ public final class FileUtil {
     public static void writeAllBytes(String path, byte[] bytes, boolean append) throws IOException {
         try (var output = new FileOutputStream(path, append)) {
             output.write(bytes);
+            output.flush();
         }
     }
 
-    public static void writeAllText(OutputStream output, String text) {
-        try (var writer = new PrintWriter(new OutputStreamWriter(output), true)) {
+    public static void writeAllText(OutputStream output, String text) throws IOException {
+        try (var writer = new BufferedWriter(new OutputStreamWriter(output))) {
             writer.write(text);
+            writer.flush();
         }
     }
 
@@ -365,13 +366,13 @@ public final class FileUtil {
         }
     }
 
-    public static void writeAllLines(OutputStream output, String[] lines) {
-        String newLine = String.format("%n");
-        try (var writer = new PrintWriter(new OutputStreamWriter(output), true)) {
+    public static void writeAllLines(OutputStream output, String[] lines) throws IOException {
+        try (var writer = new BufferedWriter(new OutputStreamWriter(output))) {
             for (int i = 0; i < lines.length; ++i) {
-                if (i > 0) writer.write(newLine);
+                if (i > 0) writer.newLine();
                 writer.write(lines[i]);
             }
+            writer.flush();
         }
     }
 
