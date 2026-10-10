@@ -318,7 +318,9 @@ public final class FileUtil {
         }
     }
 
-    public static void forEachLine(InputStream input, Consumer<String> consumer) throws IOException {
+    public static void forEachLine(InputStream input, Consumer<String> consumer)
+            throws IOException {
+
         String line;
         try (var reader = new BufferedReader(new InputStreamReader(input))) {
             while ((line = reader.readLine()) != null) {
