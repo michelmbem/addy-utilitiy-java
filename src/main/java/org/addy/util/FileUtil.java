@@ -337,6 +337,7 @@ public final class FileUtil {
     public static void writeAllBytes(File file, byte[] bytes, boolean append) throws IOException {
         try (var output = new FileOutputStream(file, append)) {
             output.write(bytes);
+            output.flush();
         }
     }
 
