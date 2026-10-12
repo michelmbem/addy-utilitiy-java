@@ -7,7 +7,6 @@ import java.util.regex.Pattern;
 
 public final class FileUtil {
     public static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
-
     private static final String CONTENT_TYPES_RESOURCE = "content-types.properties";
     private static final Map<String, String> EXTENSION_TO_CONTENT_TYPE;
     private static final Map<String, String> CONTENT_TYPE_TO_EXTENSION;
@@ -27,8 +26,10 @@ public final class FileUtil {
         Map<String, String> contentTypeToExtension = new HashMap<>();
 
         for (Map.Entry<?, ?> entry : properties.entrySet()) {
-            extensionToContentType.put(entry.getKey().toString(), entry.getValue().toString());
-            contentTypeToExtension.put(entry.getValue().toString(), entry.getKey().toString());
+            String extension = entry.getKey().toString();
+            String contentType = entry.getValue().toString();
+            extensionToContentType.put(extension, contentType);
+            contentTypeToExtension.putIfAbsent(contentType, extension);
         }
 
         EXTENSION_TO_CONTENT_TYPE = Collections.unmodifiableMap(extensionToContentType);

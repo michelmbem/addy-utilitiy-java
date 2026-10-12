@@ -10,14 +10,14 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class StringUtil {
-	private StringUtil() {}
-	
 	public static final char DEFAULT_PADDING = ' ';
-    public static final String DEFAULT_WRAPPER = "'";
-    public static final String DEFAULT_DELIMITER = "";
+	public static final String DEFAULT_WRAPPER = "'";
+	public static final String DEFAULT_DELIMITER = "";
 	public static final String DEFAULT_SPLIT_REGEX = "[\\W_]+";
 	private static final String DEFAULT_ALPHABET = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
 
+	private StringUtil() {}
+	
 	public static boolean isEmpty(String value) {
 		return value == null || value.isEmpty();
 	}
