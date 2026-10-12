@@ -300,7 +300,7 @@ public final class ImageHelper {
     
     public static ImageOrientation getOrientationFromExif(File jpegFile) {
         try {
-        	if (!FileUtil.getContentType(jpegFile).equalsIgnoreCase("image/jpeg"))
+        	if (!FileUtil.getContentType(jpegFile.getName()).equals("image/jpeg"))
                 return ImageOrientation.UNDETERMINED;
         	
             Iterable<JpegSegmentMetadataReader> readers = List.of(new ExifReader());
@@ -342,7 +342,7 @@ public final class ImageHelper {
     public static String toBase64DataURL(File imageFile) throws IOException {
         byte[] fileBytes = FileUtil.readAllBytes(imageFile);
         String base64String = Base64.getEncoder().encodeToString(fileBytes);
-        String mimeType = FileUtil.getContentType(imageFile);
+        String mimeType = FileUtil.getContentType(imageFile.getName());
         return "data:" + mimeType + ";base64," + base64String;
     }
 

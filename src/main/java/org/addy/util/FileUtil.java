@@ -1,14 +1,40 @@
 package org.addy.util;
 
 import java.io.*;
-import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 public final class FileUtil {
+    public static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
+
+    private static final String CONTENT_TYPES_RESOURCE = "content-types.properties";
+    private static final Map<String, String> EXTENSION_TO_CONTENT_TYPE;
+    private static final Map<String, String> CONTENT_TYPE_TO_EXTENSION;
+
+    static {
+        var properties = new Properties();
+
+        try (InputStream input = FileUtil.class.getClassLoader()
+                .getResourceAsStream(CONTENT_TYPES_RESOURCE)) {
+
+            properties.load(input);
+        } catch (NullPointerException | IOException e) {
+            throw new ExceptionInInitializerError(e);
+        }
+
+        Map<String, String> extensionToContentType = new HashMap<>();
+        Map<String, String> contentTypeToExtension = new HashMap<>();
+
+        for (Map.Entry<?, ?> entry : properties.entrySet()) {
+            extensionToContentType.put(entry.getKey().toString(), entry.getValue().toString());
+            contentTypeToExtension.put(entry.getValue().toString(), entry.getKey().toString());
+        }
+
+        EXTENSION_TO_CONTENT_TYPE = Collections.unmodifiableMap(extensionToContentType);
+        CONTENT_TYPE_TO_EXTENSION = Collections.unmodifiableMap(contentTypeToExtension);
+    }
+
     private FileUtil() {}
 
     public static boolean exists(String path) {
@@ -59,51 +85,17 @@ public final class FileUtil {
     public static String getExtensionFromContentType(String contentType) {
         if (StringUtil.isBlank(contentType)) return null;
 
-        String normalized = contentType.split(";", 2)[0].trim().toLowerCase();
-        return switch (normalized) {
-            case "application/pdf" -> ".pdf";
-            case "application/json" -> ".json";
-            case "application/xml" -> ".xml";
-            case "application/zip" -> ".zip";
-            case "application/gzip" -> ".gz";
-            case "text/plain" -> ".txt";
-            case "text/html" -> ".html";
-            case "text/css" -> ".css";
-            case "text/javascript" -> ".js";
-            case "text/csv" -> ".csv";
-            case "image/jpeg" -> ".jpg";
-            case "image/png" -> ".png";
-            case "image/gif" -> ".gif";
-            case "image/webp" -> ".webp";
-            case "image/svg+xml" -> ".svg";
-            case "image/bmp" -> ".bmp";
-            case "audio/mpeg" -> ".mp3";
-            case "audio/wav" -> ".wav";
-            case "video/mp4" -> ".mp4";
-            case "application/msword" -> ".doc";
-            case "application/vnd.openxmlformats-officedocument.wordprocessingml.document" -> ".docx";
-            case "application/vnd.ms-excel" -> ".xls";
-            case "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" -> ".xlsx";
-            case "application/vnd.ms-powerpoint" -> ".ppt";
-            case "application/vnd.openxmlformats-officedocument.presentationml.presentation" -> ".pptx";
-            default -> null;
-        };
+        String extension = CONTENT_TYPE_TO_EXTENSION.get(normalizeContentType(contentType));
+        return extension != null ? '.' + extension : null;
     }
 
-    public static String getContentType(File file) throws IOException {
-        String contentType = Files.probeContentType(file.toPath());
-        if (contentType == null && file.isFile()) {
-            return switch (getExtension(file.getPath())) {
-                case ".json" -> "application/json";
-                case ".jsonp" -> "application/javascript";
-                default -> "application/octet-stream";
-            };
-        }
-        return contentType;
-    }
+    public static String getContentType(String fileName) {
+        String extension = getExtension(fileName);
+        if (StringUtil.isBlank(extension)) return null;
 
-    public static String getContentType(String fileName) throws IOException {
-        return getContentType(new File(fileName));
+        return EXTENSION_TO_CONTENT_TYPE.getOrDefault(
+                normalizeExtension(extension),
+                DEFAULT_CONTENT_TYPE);
     }
 
     public static String combine(String root, String firstChild, String... moreChildren) {
@@ -395,6 +387,20 @@ public final class FileUtil {
         }
     }
 
+    private static String normalizeExtension(String extension) {
+        String normalized = extension.trim().toLowerCase(Locale.ROOT);
+
+        while (normalized.startsWith(".")) {
+            normalized = normalized.substring(1);
+        }
+
+        return normalized;
+    }
+
+    private static String normalizeContentType(String contentType) {
+        return contentType.trim().toLowerCase(Locale.ROOT);
+    }
+
     //==================== INNER CLASSES AND INTERFACES ====================
 
     @FunctionalInterface
@@ -475,14 +481,10 @@ public final class FileUtil {
         public boolean accept(File file) {
             if (file.isDirectory()) return true;
 
-            try {
-                String contentType = getContentType(file);
-                for (Pattern pattern : patterns) {
-                    if (pattern.matcher(contentType).matches())
-                        return true;
-                }
-            } catch (IOException e) {
-                e.printStackTrace();
+            String contentType = getContentType(file.getName());
+            for (Pattern pattern : patterns) {
+                if (pattern.matcher(contentType).matches())
+                    return true;
             }
 
             return false;

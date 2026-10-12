@@ -36,9 +36,9 @@ class FileUtilTest {
 
 	@Test
 	void getContentTypeWorks() throws IOException {
-		assertEquals("image/jpeg", FileUtil.getContentType(file1));
-		assertEquals("image/png", FileUtil.getContentType(file2));
-		assertEquals("application/pdf", FileUtil.getContentType(file4));
+		assertEquals("image/jpeg", FileUtil.getContentType(file1.getName()));
+		assertEquals("image/png", FileUtil.getContentType(file2.getName()));
+		assertEquals("application/pdf", FileUtil.getContentType(file4.getName()));
 		assertNull(FileUtil.getContentType(file3.getPath()));
 	}
 
