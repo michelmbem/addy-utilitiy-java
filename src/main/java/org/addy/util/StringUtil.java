@@ -149,7 +149,15 @@ public final class StringUtil {
                 .collect(Collectors.joining());
     }
 
-    public static String splitJoinCamelCase(String value, String regex) {
+	public static String splitJoin(String value, String regex, CharSequence delimiter) {
+		return value != null ? join(value.split(regex), delimiter) : null;
+	}
+
+	public static String splitJoin(String value, CharSequence delimiter) {
+		return splitJoin(value, DEFAULT_SPLIT_REGEX, delimiter);
+	}
+
+	public static String splitJoinCamelCase(String value, String regex) {
         return value != null ? joinCamelCase(value.split(regex)) : null;
     }
 
@@ -188,13 +196,13 @@ public final class StringUtil {
                 : null;
     }
     
-    public static String randomString(int length, String alphabaet) {
+    public static String randomString(int length, String alphabet) {
         var sb = new StringBuilder();
         Random random = ThreadLocalRandom.current();
-        int max = alphabaet.length();
+        int max = alphabet.length();
         
         for (int i = 0; i < length; ++i) {
-            sb.append(alphabaet.charAt(random.nextInt(max)));
+            sb.append(alphabet.charAt(random.nextInt(max)));
         }
         
         return sb.toString();

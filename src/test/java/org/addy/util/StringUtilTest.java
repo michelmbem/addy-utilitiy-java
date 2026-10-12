@@ -1,39 +1,13 @@
 package org.addy.util;
 
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.ValueSource;
 
-import java.util.Arrays;
 import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class StringUtilTest {
     private static final String[] values = {"one", "two", "three", "four"};
-    private static int count = 0;
-
-    @ParameterizedTest()
-    @ValueSource(ints = {2, 3, 4, 5, 6})
-    void StringSplitByNTest(int n) {
-        String str = "Je me figure ce zouave qui boit du whisky en jouant au xylophone";
-        var sb = new StringBuilder();
-        count = 0;
-
-        str.chars().filter(c -> !Character.isSpaceChar(c))
-                .forEach(c -> {
-                    sb.append((char)c);
-                    if (++count >= n) {
-                        count = 0;
-                        sb.append('\n');
-                    }
-                });
-
-        String[] lines = sb.toString().split("\n");
-        long m = Arrays.stream(lines).filter(s -> s.length() != n).count();
-
-        assertTrue(m <= 1);
-    }
 
     @Test
     void isEmptyWorks() {
@@ -153,6 +127,12 @@ class StringUtilTest {
     @Test
     void joinPascalCaseWorks() {
         assertEquals("OneTwoThreeFour", StringUtil.joinPascalCase(values));
+    }
+
+    @Test
+    void splitJoinWorks() {
+        assertEquals("un-deux-trois-quatre", StringUtil.splitJoin("un deux trois quatre", "-"));
+        assertEquals("lundi_mardi_mercredi", StringUtil.splitJoin("lundi:mardi:mercredi", ":", "_"));
     }
 
     @Test
