@@ -4,6 +4,7 @@ import java.io.*;
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public final class FileUtil {
     public static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
@@ -260,18 +261,14 @@ public final class FileUtil {
     }
 
     public static String readAllText(InputStream input) throws IOException {
-        var sb = new StringBuilder();
         String newLine = String.format("%n");
-        String line;
+        String text;
 
         try (var reader = new BufferedReader(new InputStreamReader(input))) {
-            while ((line = reader.readLine()) != null) {
-                if (!sb.isEmpty()) sb.append(newLine);
-                sb.append(line);
-            }
+            text = reader.lines().collect(Collectors.joining(newLine));
         }
 
-        return sb.toString();
+        return text;
     }
 
     public static String readAllText(File file) throws IOException {
@@ -287,16 +284,13 @@ public final class FileUtil {
     }
 
     public static String[] readAllLines(InputStream input) throws IOException {
-        List<String> lines = new ArrayList<>();
-        String line;
+        String[] lines;
 
         try (var reader = new BufferedReader(new InputStreamReader(input))) {
-            while ((line = reader.readLine()) != null) {
-                lines.add(line);
-            }
+            lines = reader.lines().toArray(String[]::new);
         }
 
-        return lines.toArray(String[]::new);
+        return lines;
     }
 
     public static String[] readAllLines(File file) throws IOException {
@@ -314,11 +308,8 @@ public final class FileUtil {
     public static void forEachLine(InputStream input, Consumer<String> consumer)
             throws IOException {
 
-        String line;
         try (var reader = new BufferedReader(new InputStreamReader(input))) {
-            while ((line = reader.readLine()) != null) {
-                consumer.accept(line);
-            }
+            reader.lines().forEach(consumer);
         }
     }
 
