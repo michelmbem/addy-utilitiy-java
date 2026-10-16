@@ -126,7 +126,7 @@ class FileUtilTest {
 	void walkTreeWorks() {
 		List<String> fileList = new LinkedList<>();
 		FileUtil.walkTree(file3, file -> true, node -> fileList.add(node.getPath()));
-		assertEquals(10, fileList.size());
+		assertEquals(11, fileList.size());
 		assertTrue(fileList.contains(file1.getPath()));
 		assertTrue(fileList.contains(file4.getPath()));
 	}

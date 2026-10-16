@@ -27,6 +27,9 @@ class ImageHelperTest {
 
 		file = new File("files/tiles.jpg");
 		if (file.exists()) file.delete();
+
+		file = new File("files/sprite.jpg");
+		if (file.exists()) file.delete();
 	}
 
 	@Test
@@ -88,6 +91,23 @@ class ImageHelperTest {
 			Image tiles = ImageHelper.makeTiles(files, 256, 256, Color.LIGHT_GRAY);
 			ImageIO.write((RenderedImage) tiles, "jpg", outFile);
 			assertTrue(outFile.exists());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	@Order(5)
+	void canGetSprite() {
+		File sheetFile = new File("files/tiles.jpg");
+		File spriteFile = new File("files/sprite.jpg");
+
+		try {
+			Image sheet = ImageIO.read(sheetFile);
+			Image sprite = ImageHelper.getSprite(sheet, 1, 0, 128, 128,
+					new Insets(0, 0, 0, 0));
+			ImageIO.write((RenderedImage) sprite, "jpg", spriteFile);
+			assertTrue(spriteFile.exists());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

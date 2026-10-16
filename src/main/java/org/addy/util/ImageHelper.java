@@ -274,6 +274,22 @@ public final class ImageHelper {
         return image;
     }
 
+    public static Image getSprite(Image spriteSheet, int spriteX, int spriteY,
+                                  int spriteWidth, int spriteHeight, Insets spriteInsets) {
+
+        int left = spriteX * spriteWidth + spriteInsets.left;
+        int top = spriteY * spriteHeight + spriteInsets.top;
+        int width = spriteWidth - spriteInsets.left - spriteInsets.right;
+        int height = spriteHeight - spriteInsets.top - spriteInsets.bottom;
+        var sprite = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        var g = (Graphics2D) sprite.getGraphics();
+        g.drawImage(
+                spriteSheet, 0, 0, width, height,
+                left, top, left + width, top + height, null);
+
+        return sprite;
+    }
+
 	private static void paintCover(Graphics2D g, BufferedImage image,
                                    int left, int top, int width, int height) {
 
