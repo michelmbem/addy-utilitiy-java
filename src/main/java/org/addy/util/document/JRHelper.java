@@ -1,4 +1,4 @@
-package org.addy.util;
+package org.addy.util.document;
 
 import net.sf.jasperreports.engine.*;
 import net.sf.jasperreports.engine.export.*;
@@ -13,6 +13,7 @@ import net.sf.jasperreports.json.export.SimpleJsonExporterOutput;
 import net.sf.jasperreports.pdf.JRPdfExporter;
 import net.sf.jasperreports.poi.export.JRXlsExporter;
 import net.sf.jasperreports.swing.JRViewer;
+import org.addy.util.FileUtil;
 
 import javax.swing.*;
 import java.awt.*;

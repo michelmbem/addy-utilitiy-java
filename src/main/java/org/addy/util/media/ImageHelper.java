@@ -1,92 +1,18 @@
-package org.addy.util;
+package org.addy.util.media;
 
-import com.drew.imaging.jpeg.JpegMetadataReader;
-import com.drew.imaging.jpeg.JpegProcessingException;
-import com.drew.imaging.jpeg.JpegSegmentMetadataReader;
-import com.drew.metadata.Directory;
-import com.drew.metadata.Metadata;
-import com.drew.metadata.MetadataException;
-import com.drew.metadata.exif.ExifDirectoryBase;
-import com.drew.metadata.exif.ExifIFD0Directory;
-import com.drew.metadata.exif.ExifReader;
-import org.apache.pdfbox.pdmodel.PDDocument;
-import org.apache.pdfbox.rendering.PDFRenderer;
-import org.jcodec.api.FrameGrab;
-import org.jcodec.api.JCodecException;
-import org.jcodec.common.DemuxerTrack;
-import org.jcodec.common.io.NIOUtils;
-import org.jcodec.common.io.SeekableByteChannel;
-import org.jcodec.common.model.Picture;
-import org.jcodec.containers.mp4.demuxer.MP4Demuxer;
-import org.jcodec.scale.AWTUtil;
+import org.addy.util.ArrayUtil;
+import org.addy.util.FileUtil;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
-import java.awt.image.RenderedImage;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.List;
 
 public final class ImageHelper {
-
-    public enum RotationAngle {
-        CW(1),
-        CCW(-1),
-        DCW(2);
-
-        private final int direction;
-
-        RotationAngle(int direction) {
-            this.direction = direction;
-        }
-
-        public int getDirection() {
-            return direction;
-        }
-
-        public double getRadians() {
-            return direction * Math.PI / 2;
-        }
-    }
-
-    public enum FlipAxis {
-        X(false, true),
-        Y(true, false),
-        BOTH(true, true);
-
-        private final boolean horizontal;
-        private final boolean vertical;
-
-        FlipAxis(boolean horizontal, boolean vertical) {
-            this.horizontal = horizontal;
-            this.vertical = vertical;
-        }
-
-        public boolean isHorizontal() {
-            return horizontal;
-        }
-
-        public boolean isVertical() {
-            return vertical;
-        }
-    }
-
-    public enum ImageOrientation {
-        UNDETERMINED,
-        NORMAL,
-        FLIP_HORIZONTAL,
-        ROTATE_180,
-        FLIP_VERTICAL,
-        FLIP_VERTICAL_ROTATE_CW,
-        ROTATE_CW,
-        FLIP_HORIZONTAL_ROTATE_CW,
-        ROTATE_CCW
-    }
-
     private ImageHelper() {}
     
     public static BufferedImage buffer(Image originalImage, int imageType) {
@@ -249,29 +175,49 @@ public final class ImageHelper {
         return image;
     }
     
-    public static Image makeTiles(File[] sourceFiles, int width, int height, Paint bg)
-            throws IOException {
+    public static Image makeTiles(File[] sourceFiles, int width, int height,
+                                  int rows, int columns, Paint background) throws IOException {
+
+        if (ArrayUtil.isEmpty(sourceFiles)) throw new IllegalArgumentException("No source file provided");
+        if (width <= 0) throw new IllegalArgumentException("width must be positive");
+        if (height <= 0) throw new IllegalArgumentException("height must be positive");
+        if (rows <= 0) throw new IllegalArgumentException("rows must be positive");
+        if (columns <= 0) throw new IllegalArgumentException("columns must be positive");
 
         var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         var g = (Graphics2D) image.getGraphics();
         g.setRenderingHint(
                 RenderingHints.KEY_INTERPOLATION,
                 RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-        g.setPaint(bg);
+        g.setPaint(background);
         g.fillRect(0, 0, width, height);
-        
-        int row = 0, col = 0;
+
+        int tileWidth = (int)((float) width / columns);
+        int tileHeight = (int)((float) height / rows);
+        int row = 0, column = 0;
+
         for (File sourceFile : sourceFiles) {
         	BufferedImage tile = ImageIO.read(sourceFile);
-            paintCover(g, tile, col * width / 2, row * height / 2, width / 2, height / 2);
-            if (++col >= 2) {
-                col = 0;
-                if (++row >= 2)
+            paintCover(g, tile, column * tileWidth, row * tileHeight, tileWidth, tileHeight);
+            if (++column >= columns) {
+                column = 0;
+                if (++row >= rows)
                     break;
             }
         }
-        
+
+        g.dispose();
         return image;
+    }
+
+    public static Image makeTiles(File[] sourceFiles, int width, int height, Paint background) throws IOException {
+        if (ArrayUtil.isEmpty(sourceFiles)) throw new IllegalArgumentException("No source file provided");
+        if (width <= 0) throw new IllegalArgumentException("width must be positive");
+        if (height <= 0) throw new IllegalArgumentException("height must be positive");
+
+        int rows = (int) Math.sqrt(sourceFiles.length);
+        int columns = (int) Math.ceil((double) sourceFiles.length / rows);
+        return makeTiles(sourceFiles, width, height, rows, columns, background);
     }
 
     public static Image getSprite(Image spriteSheet, int spriteX, int spriteY,
@@ -288,6 +234,21 @@ public final class ImageHelper {
                 left, top, left + width, top + height, null);
 
         return sprite;
+    }
+
+    public static String toBase64DataURL(File imageFile) throws IOException {
+        byte[] fileBytes = FileUtil.readAllBytes(imageFile);
+        String base64String = Base64.getEncoder().encodeToString(fileBytes);
+        String mimeType = FileUtil.getContentType(imageFile.getName());
+        return "data:" + mimeType + ";base64," + base64String;
+    }
+
+    public static Image fromBase64DataURL(String base64String) throws IOException {
+        if (!base64String.startsWith("data:image/")) return null;
+        int commaIndex = base64String.indexOf(',');
+        if (commaIndex < 0) return null;
+        byte[] bytes = Base64.getDecoder().decode(base64String.substring(commaIndex + 1));
+        return ImageIO.read(new ByteArrayInputStream(bytes));
     }
 
 	private static void paintCover(Graphics2D g, BufferedImage image,
@@ -313,101 +274,5 @@ public final class ImageHelper {
                 image, left, top, left + width, top + height,
                 x, y, x + w, y + h, null);
 	}
-    
-    public static ImageOrientation getOrientationFromExif(File jpegFile) {
-        try {
-        	if (!FileUtil.getContentType(jpegFile.getName()).equals("image/jpeg"))
-                return ImageOrientation.UNDETERMINED;
-        	
-            Iterable<JpegSegmentMetadataReader> readers = List.of(new ExifReader());
-            Metadata metadata = JpegMetadataReader.readMetadata(jpegFile, readers);
-            Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
-
-            return directory != null
-                    ? ImageOrientation.values()[
-                            directory.getInt(ExifDirectoryBase.TAG_ORIENTATION)]
-                    : ImageOrientation.UNDETERMINED;
-        } catch (IOException | MetadataException | JpegProcessingException e) {
-            e.printStackTrace();
-            return ImageOrientation.UNDETERMINED;
-        }
-    }
-    
-    public static void correctOrientation(File sourceFile, File destFile) {
-        ImageOrientation orientation = getOrientationFromExif(sourceFile);
-        if (orientation.ordinal() <= ImageOrientation.NORMAL.ordinal()) return;
-
-        try {
-            Image image = ImageIO.read(sourceFile);
-            image = switch (orientation) {
-                case FLIP_HORIZONTAL -> flip(image, FlipAxis.Y);
-                case FLIP_VERTICAL -> flip(image, FlipAxis.X);
-                case ROTATE_CW -> rotate(image, RotationAngle.CW);
-                case ROTATE_CCW -> rotate(image, RotationAngle.CCW);
-                case ROTATE_180 -> rotate(image, RotationAngle.DCW);
-                case FLIP_HORIZONTAL_ROTATE_CW ->
-                        rotate(flip(image, FlipAxis.Y), RotationAngle.CW);
-                default -> rotate(flip(image, FlipAxis.X), RotationAngle.CW);
-            };
-            ImageIO.write((RenderedImage) image, "jpg", destFile);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    public static String toBase64DataURL(File imageFile) throws IOException {
-        byte[] fileBytes = FileUtil.readAllBytes(imageFile);
-        String base64String = Base64.getEncoder().encodeToString(fileBytes);
-        String mimeType = FileUtil.getContentType(imageFile.getName());
-        return "data:" + mimeType + ";base64," + base64String;
-    }
-
-    public static Image fromBase64DataURL(String base64String) throws IOException {
-    	if (!base64String.startsWith("data:image/")) return null;
-    	int commaIndex = base64String.indexOf(',');
-    	if (commaIndex < 0) return null;
-    	byte[] bytes = Base64.getDecoder().decode(base64String.substring(commaIndex + 1));
-    	return ImageIO.read(new ByteArrayInputStream(bytes));
-    }
-    
-    public static Image getImageFromPDFPage(File pdfFile, int pageNumber) {
-        BufferedImage image = null;
-        
-        try (PDDocument document = PDDocument.load(pdfFile)) {
-            var renderer = new PDFRenderer(document);
-            image = renderer.renderImage(pageNumber);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        return image;
-    }
-    
-    public static BufferedImage extractVideoFrame(File videoFile, float relativePosition) {
-        BufferedImage capturedFrame = null;
-        int frameNumber;
-        
-        try {
-            SeekableByteChannel channel = NIOUtils.readableFileChannel(videoFile.getPath());
-            
-            try (MP4Demuxer demuxer = MP4Demuxer.createMP4Demuxer(channel)) {
-                DemuxerTrack videoTrack = demuxer.getVideoTrack();
-                
-                if (relativePosition >= 1)
-                    frameNumber = (int) relativePosition;
-                else if (relativePosition >= 0)
-                    frameNumber = (int) (videoTrack.getMeta().getTotalFrames() * relativePosition);
-                else
-                    frameNumber = (int) (videoTrack.getMeta().getTotalFrames() + relativePosition);
-            }
-            
-            Picture picture = FrameGrab.getFrameFromFile(videoFile, frameNumber);
-            capturedFrame = AWTUtil.toBufferedImage(picture);
-        } catch (IOException | JCodecException e) {
-            e.printStackTrace();
-        }
-        
-        return capturedFrame;
-    }
 
 }

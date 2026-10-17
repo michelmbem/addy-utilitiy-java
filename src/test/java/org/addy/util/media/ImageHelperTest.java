@@ -1,5 +1,6 @@
-package org.addy.util;
+package org.addy.util.media;
 
+import org.addy.util.FileUtil;
 import org.junit.jupiter.api.*;
 
 import javax.imageio.ImageIO;
@@ -16,6 +17,7 @@ class ImageHelperTest {
 	static void setup() {
 		String[] names = {"jordan", "daniel"};
 		String[] modifiers = {"corrected", "gs", "flipped"};
+		String[] generated = {"tiles", "sprite"};
 		File file;
 
 		for (String name : names) {
@@ -25,24 +27,24 @@ class ImageHelperTest {
 			}
 		}
 
-		file = new File("files/tiles.jpg");
-		if (file.exists()) file.delete();
-
-		file = new File("files/sprite.jpg");
-		if (file.exists()) file.delete();
+		for (String basename : generated) {
+			file = new File("files/" + basename + ".jpg");
+			if (file.exists()) file.delete();
+		}
 	}
 
 	@Test
 	@Order(1)
 	void canDetectAndCorrectJpegOrientation() {
 		File[] files = new File[] {
-			new File("files/jordan.jpg"),
-			new File("files/daniel.jpg")};
-		
+				new File("files/jordan.jpg"),
+				new File("files/daniel.jpg")};
+
 		for (File srcFile : files) {
 			String path = srcFile.getPath();
-			File destFile = new File(FileUtil.changeExtension(path, "-corrected" + FileUtil.getExtension(path)));
-			ImageHelper.correctOrientation(srcFile, destFile);
+			File destFile = new File(FileUtil.changeExtension(
+					path, "-corrected" + FileUtil.getExtension(path)));
+			JpegImageHelper.correctOrientation(srcFile, destFile);
 			assertTrue(destFile.isFile());
 		}
 	}
@@ -55,7 +57,7 @@ class ImageHelperTest {
 			File destFile = new File("files/jordan-gs.jpg");
 			Image srcImage = ImageIO.read(srcFile);
 			Image destImage = ImageHelper.grayScale(srcImage);
-			ImageIO.write((RenderedImage) destImage, "jpg", destFile);
+			ImageIO.write((RenderedImage) destImage, JpegImageHelper.FORMAT, destFile);
 			assertTrue(destFile.isFile());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -69,8 +71,8 @@ class ImageHelperTest {
 			File srcFile = new File("files/daniel-corrected.jpg");
 			File destFile = new File("files/daniel-flipped.jpg");
 			Image srcImage = ImageIO.read(srcFile);
-			Image destImage = ImageHelper.flip(srcImage, ImageHelper.FlipAxis.Y);
-			ImageIO.write((RenderedImage) destImage, "jpg", destFile);
+			Image destImage = ImageHelper.flip(srcImage, FlipAxis.Y);
+			ImageIO.write((RenderedImage) destImage, JpegImageHelper.FORMAT, destFile);
 			assertTrue(destFile.isFile());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -81,15 +83,16 @@ class ImageHelperTest {
 	@Order(4)
 	void canCreateImageTiles() {
 		File[] files = new File[] {
-			new File("files/image-from-pexels.jpg"),
-			new File("files/jordan-corrected.jpg"),
-			new File("files/daniel-corrected.jpg")};
+				new File("files/image-from-pexels.jpg"),
+				new File("files/jordan-corrected.jpg"),
+				new File("files/daniel-corrected.jpg"),
+				new File("files/image-from-internet.png")};
 		
 		File outFile = new File("files/tiles.jpg");
 		
 		try {
 			Image tiles = ImageHelper.makeTiles(files, 256, 256, Color.LIGHT_GRAY);
-			ImageIO.write((RenderedImage) tiles, "jpg", outFile);
+			ImageIO.write((RenderedImage) tiles, JpegImageHelper.FORMAT, outFile);
 			assertTrue(outFile.exists());
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -106,7 +109,7 @@ class ImageHelperTest {
 			Image sheet = ImageIO.read(sheetFile);
 			Image sprite = ImageHelper.getSprite(sheet, 1, 0, 128, 128,
 					new Insets(0, 0, 0, 0));
-			ImageIO.write((RenderedImage) sprite, "jpg", spriteFile);
+			ImageIO.write((RenderedImage) sprite, JpegImageHelper.FORMAT, spriteFile);
 			assertTrue(spriteFile.exists());
 		} catch (IOException e) {
 			e.printStackTrace();
