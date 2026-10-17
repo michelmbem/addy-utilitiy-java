@@ -26,6 +26,7 @@
     </properties>
 
     <dependencies>
+        <!-- metadata-extractor -->
         <dependency>
             <groupId>com.drewnoakes</groupId>
             <artifactId>metadata-extractor</artifactId>
@@ -33,6 +34,7 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+        <!-- jcodec -->
         <dependency>
             <groupId>org.jcodec</groupId>
             <artifactId>jcodec</artifactId>
@@ -47,13 +49,15 @@
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+        <!-- pdfbox -->
         <dependency>
-            <groupId>org.apache.pdfbox</groupId>
-            <artifactId>pdfbox</artifactId>
-            <version>2.0.24</version>
+            <groupId>com.openhtmltopdf</groupId>
+            <artifactId>openhtmltopdf-pdfbox</artifactId>
+            <version>1.0.10</version>
             <scope>compile</scope>
             <optional>true</optional>
         </dependency>
+        <!-- jasperreports -->
         <dependency>
             <groupId>net.sf.jasperreports</groupId>
             <artifactId>jasperreports-pdf</artifactId>
@@ -76,6 +80,7 @@
             <optional>true</optional>
         </dependency>
 
+        <!-- junit -->
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter</artifactId>

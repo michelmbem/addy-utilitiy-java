@@ -29,8 +29,7 @@ public final class ImageHelper {
         return bufferedImage;
     }
 
-    public static Image resize(Image originalImage,
-                               int desiredWidth,
+    public static Image resize(Image originalImage, int desiredWidth,
                                int desiredHeight,
                                boolean preserveAspectRatio) {
 
@@ -52,29 +51,17 @@ public final class ImageHelper {
                 effectiveWidth = (int) (effectiveHeight * aspectRatio);
             }
 
-            resizedImage = new BufferedImage(
-                    effectiveWidth,
-                    effectiveHeight,
-                    BufferedImage.TYPE_INT_RGB);
+            resizedImage = new BufferedImage(effectiveWidth, effectiveHeight, BufferedImage.TYPE_INT_RGB);
             var g = (Graphics2D) resizedImage.getGraphics();
-			g.setRenderingHint(
-                    RenderingHints.KEY_INTERPOLATION,
-                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.drawImage(
-                    originalImage, 0, 0, effectiveWidth, effectiveHeight,
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.drawImage(originalImage, 0, 0, effectiveWidth, effectiveHeight,
                     0, 0, width, height, null);
             g.dispose();
         } else {
-            resizedImage = new BufferedImage(
-                    desiredWidth,
-                    desiredHeight,
-                    BufferedImage.TYPE_INT_RGB);
+            resizedImage = new BufferedImage(desiredWidth, desiredHeight, BufferedImage.TYPE_INT_RGB);
             var g = (Graphics2D) resizedImage.getGraphics();
-			g.setRenderingHint(
-                    RenderingHints.KEY_INTERPOLATION,
-                    RenderingHints.VALUE_INTERPOLATION_BILINEAR);
-            g.drawImage(
-                    originalImage, 0, 0, desiredWidth, desiredHeight,
+			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.drawImage(originalImage, 0, 0, desiredWidth, desiredHeight,
                     0, 0, width, height, null);
             g.dispose();
         }
@@ -112,17 +99,13 @@ public final class ImageHelper {
 
         if (axis.isHorizontal()) {
             for (int i = 0, j = width - 1; i < width; ++i, --j) {
-                g.drawImage(
-                        originalImage, i, 0, i + 1, height,
-                        j, 0, j + 1, height, null);
+                g.drawImage(originalImage, i, 0, i + 1, height, j, 0, j + 1, height, null);
             }
         }
 
         if (axis.isVertical()) {
             for (int i = 0, j = height - 1; i < height; ++i, --j) {
-                g.drawImage(
-                        originalImage, 0, i, width, i + 1,
-                        0, j, width, j + 1, null);
+                g.drawImage(originalImage, 0, i, width, i + 1, 0, j, width, j + 1, null);
             }
         }
 
@@ -142,13 +125,9 @@ public final class ImageHelper {
         if (croppedWidth <= 0 || croppedHeight <= 0)
             return new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 
-        Image croppedImage = new BufferedImage(
-                croppedWidth,
-                croppedHeight,
-                BufferedImage.TYPE_INT_RGB);
+        Image croppedImage = new BufferedImage(croppedWidth, croppedHeight, BufferedImage.TYPE_INT_RGB);
         var g = (Graphics2D) croppedImage.getGraphics();
-        g.drawImage(
-                originalImage, 0, 0, croppedWidth, croppedHeight,
+        g.drawImage(originalImage, 0, 0, croppedWidth, croppedHeight,
                 left, top, width - right, height - bottom, null);
         g.dispose();
 
@@ -174,6 +153,23 @@ public final class ImageHelper {
 
         return image;
     }
+
+    public static Image addBorder(Image originalImage, Paint borderPaint, Insets borderInsets) {
+        int originalWidth = originalImage.getWidth(null);
+        int originalHeight = originalImage.getHeight(null);
+        int width = originalWidth + borderInsets.left + borderInsets.right;
+        int height = originalHeight + borderInsets.top + borderInsets.bottom;
+        var imageWithBorder = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        var g = (Graphics2D) imageWithBorder.getGraphics();
+
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setPaint(borderPaint);
+        g.fillRect(0, 0, width, height);
+        g.drawImage(originalImage, borderInsets.left, borderInsets.top, originalWidth, originalHeight, null);
+        g.dispose();
+
+        return imageWithBorder;
+    }
     
     public static Image makeTiles(File[] sourceFiles, int width, int height,
                                   int rows, int columns, Paint background) throws IOException {
@@ -186,9 +182,7 @@ public final class ImageHelper {
 
         var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         var g = (Graphics2D) image.getGraphics();
-        g.setRenderingHint(
-                RenderingHints.KEY_INTERPOLATION,
-                RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
         g.setPaint(background);
         g.fillRect(0, 0, width, height);
 
@@ -201,8 +195,7 @@ public final class ImageHelper {
             paintCover(g, tile, column * tileWidth, row * tileHeight, tileWidth, tileHeight);
             if (++column >= columns) {
                 column = 0;
-                if (++row >= rows)
-                    break;
+                if (++row >= rows) break;
             }
         }
 
@@ -229,8 +222,8 @@ public final class ImageHelper {
         int height = spriteHeight - spriteInsets.top - spriteInsets.bottom;
         var sprite = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         var g = (Graphics2D) sprite.getGraphics();
-        g.drawImage(
-                spriteSheet, 0, 0, width, height,
+
+        g.drawImage(spriteSheet, 0, 0, width, height,
                 left, top, left + width, top + height, null);
 
         return sprite;
@@ -270,8 +263,7 @@ public final class ImageHelper {
 			y = (image.getHeight() - h) / 2;
 		}
 
-		g.drawImage(
-                image, left, top, left + width, top + height,
+		g.drawImage(image, left, top, left + width, top + height,
                 x, y, x + w, y + h, null);
 	}
 
