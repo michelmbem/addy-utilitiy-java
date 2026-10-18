@@ -220,11 +220,34 @@ public final class ImageHelper {
         int top = spriteY * spriteHeight + spriteInsets.top;
         int width = spriteWidth - spriteInsets.left - spriteInsets.right;
         int height = spriteHeight - spriteInsets.top - spriteInsets.bottom;
+
         var sprite = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         var g = (Graphics2D) sprite.getGraphics();
-
         g.drawImage(spriteSheet, 0, 0, width, height,
                 left, top, left + width, top + height, null);
+        g.dispose();
+
+        return sprite;
+    }
+
+    public static Image getSprite(Image spriteSheet, int spriteX, int spriteY,
+                                  int[] spriteWidths, int[] spriteHeights,
+                                  Insets spriteInsets) {
+
+        int left = spriteInsets.left;
+        for (int i = 0; i < spriteX; ++i) left += spriteWidths[i];
+
+        int top = spriteInsets.top;
+        for (int i = 0; i < spriteY; ++i) top += spriteHeights[i];
+
+        int width = spriteWidths[spriteX] - spriteInsets.left - spriteInsets.right;
+        int height = spriteHeights[spriteY] - spriteInsets.top - spriteInsets.bottom;
+
+        var sprite = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
+        var g = (Graphics2D) sprite.getGraphics();
+        g.drawImage(spriteSheet, 0, 0, width, height,
+                left, top, left + width, top + height, null);
+        g.dispose();
 
         return sprite;
     }
