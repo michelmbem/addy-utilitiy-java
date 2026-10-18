@@ -2,8 +2,8 @@ package org.addy.util.media;
 
 import java.awt.Insets;
 
-public final class InsertsFactory {
-    private InsertsFactory() {}
+public final class InsetsFactory {
+    private InsetsFactory() {}
 
     public static Insets empty() {
         return uniform(0);
