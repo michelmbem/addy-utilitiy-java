@@ -118,6 +118,18 @@ public final class StringUtil {
 				? value
 				: value.substring(0, 1).toUpperCase() + value.substring(1);
 	}
+
+	public static String[] splitWords(String value) {
+		if (isEmpty(value)) return new String[0];
+
+		String[] words = value.replaceAll("([A-Z])", " $1")
+				.split(DEFAULT_SPLIT_REGEX);
+
+		return Stream.of(words)
+				.filter(word -> !isBlank(word))
+				.map(String::toLowerCase)
+				.toArray(String[]::new);
+	}
     
     public static <T> String join(T[] values, CharSequence delimiter) {
         return Stream.of(values)
@@ -210,5 +222,33 @@ public final class StringUtil {
 
 	public static String randomString(int length) {
 		return randomString(length, DEFAULT_ALPHABET);
+	}
+
+	public static String requireNonEmpty(String value) {
+		if (isEmpty(value)) throw new IllegalArgumentException();
+		return value;
+	}
+
+	public static String requireNonEmpty(String value, String message) {
+		if (isEmpty(value)) throw new IllegalArgumentException(message);
+		return value;
+	}
+
+	public static String requireNonEmptyElse(String value, String altValue) {
+		return isEmpty(value) ? altValue : value;
+	}
+
+	public static String requireNonBlank(String value) {
+		if (isBlank(value)) throw new IllegalArgumentException();
+		return value;
+	}
+
+	public static String requireNonBlank(String value, String message) {
+		if (isBlank(value)) throw new IllegalArgumentException(message);
+		return value;
+	}
+
+	public static String requireNonBlankElse(String value, String altValue) {
+		return isBlank(value) ? altValue : value;
 	}
 }

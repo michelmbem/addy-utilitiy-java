@@ -20,9 +20,12 @@ public final class ObjectUtil {
     }
 
     public static <T> T requireNonEmpty(T value) {
-        if (isEmpty(value))
-            throw new IllegalArgumentException("The value should not be empty");
+        if (isEmpty(value)) throw new IllegalArgumentException();
+        return value;
+    }
 
+    public static <T> T requireNonEmpty(T value, String message) {
+        if (isEmpty(value)) throw new IllegalArgumentException(message);
         return value;
     }
 

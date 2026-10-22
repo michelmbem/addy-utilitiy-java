@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Locale;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 class StringUtilTest {
@@ -162,5 +163,51 @@ class StringUtilTest {
     @Test
     void randomStringWorks() {
         assertEquals(16, StringUtil.randomString(16).length());
+    }
+
+    @Test
+    void splitWordsWorks() {
+        String value = "theQuickBrownFox jumps-over TheLazyDog";
+        String[] words = {"the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"};
+        assertThat(StringUtil.splitWords(value)).isEqualTo(words);
+    }
+
+    @Test
+    void requireNonEmptyWorks() {
+        assertThrows(IllegalArgumentException.class,
+                () -> StringUtil.requireNonEmpty(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> StringUtil.requireNonEmpty(""));
+        assertThrows(IllegalArgumentException.class,
+                () -> StringUtil.requireNonEmpty(new String(), "Empty string not allowed"));
+        assertDoesNotThrow(() -> StringUtil.requireNonEmpty(" "));
+        assertDoesNotThrow(() -> StringUtil.requireNonEmpty("Hello funny world!"));
+    }
+
+    @Test
+    void requireNonBlankWorks() {
+        assertThrows(IllegalArgumentException.class,
+                () -> StringUtil.requireNonBlank(null));
+        assertThrows(IllegalArgumentException.class,
+                () -> StringUtil.requireNonBlank(""));
+        assertThrows(IllegalArgumentException.class,
+                () -> StringUtil.requireNonBlank(" ", "Blank string not allowed"));
+        assertDoesNotThrow(() -> StringUtil.requireNonBlank("Hello funny world!"));
+    }
+
+    @Test
+    void requireNonEmptyElseWorks() {
+        assertEquals("Joe", StringUtil.requireNonEmptyElse(null, "Joe"));
+        assertEquals("Jane", StringUtil.requireNonEmptyElse("", "Jane"));
+        assertNotEquals("Joey", StringUtil.requireNonEmptyElse(" ", "Joey"));
+        assertNotEquals("Dave", StringUtil.requireNonEmptyElse("Guy", "Dave"));
+    }
+
+    @Test
+    void requireNonBlankElseWorks() {
+        assertEquals("Joe", StringUtil.requireNonBlankElse(null, "Joe"));
+        assertEquals("Jane", StringUtil.requireNonBlankElse("", "Jane"));
+        assertEquals("Joey", StringUtil.requireNonBlankElse(" ", "Joey"));
+        assertNotEquals("Dave", StringUtil.requireNonBlankElse("Guy", "Dave"));
     }
 }
