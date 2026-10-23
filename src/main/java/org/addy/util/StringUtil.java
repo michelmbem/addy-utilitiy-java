@@ -122,7 +122,8 @@ public final class StringUtil {
 	public static String[] splitWords(String value) {
 		if (isEmpty(value)) return new String[0];
 
-		String[] words = value.replaceAll("([A-Z])", " $1")
+		String[] words = value.replaceAll(
+				"(?<=[a-z])([A-Z])|(?<=[A-Z])([A-Z])(?=[a-z])", " $1$2")
 				.split(DEFAULT_SPLIT_REGEX);
 
 		return Stream.of(words)

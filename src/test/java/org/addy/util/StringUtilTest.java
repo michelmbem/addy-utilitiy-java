@@ -167,7 +167,7 @@ class StringUtilTest {
 
     @Test
     void splitWordsWorks() {
-        String value = "theQuickBrownFox jumps-over TheLazyDog";
+        String value = "theQUICKBrownFox jumps-over TheLazyDog";
         String[] words = {"the", "quick", "brown", "fox", "jumps", "over", "the", "lazy", "dog"};
         assertThat(StringUtil.splitWords(value)).isEqualTo(words);
     }
