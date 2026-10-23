@@ -9,6 +9,7 @@ import java.math.BigInteger;
 import java.text.ParseException;
 import java.time.*;
 import java.util.Date;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
@@ -246,17 +247,17 @@ public final class ValueConverter {
     }
 
     private static <T> T convertByIntrospection(Object value, Class<T> targetType) {
-        Reference<T> ref = new Reference<>();
+        var ref = new AtomicReference<T>();
         if (constructed(targetType, value, ref) ||
                 factored(targetType, value, ref) ||
                 converted(targetType, value, ref))
-            return ref.getTarget();
+            return ref.get();
 
         throw new ClassCastException("Could not cast " + value + " to " + targetType);
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> boolean constructed(Class<T> targetType, Object value, Reference<T> ref) {
+    private static <T> boolean constructed(Class<T> targetType, Object value, AtomicReference<T> ref) {
         Constructor<?> constructor = Stream.of(targetType.getConstructors())
                 .filter(c -> Modifier.isPublic(c.getModifiers()) &&
                         c.getParameterTypes().length == 1 &&
@@ -266,7 +267,7 @@ public final class ValueConverter {
 
         if (constructor != null) {
             try {
-                ref.setTarget((T) constructor.newInstance(value));
+                ref.set((T) constructor.newInstance(value));
                 return true;
             } catch (InvocationTargetException |
                      InstantiationException |
@@ -278,7 +279,7 @@ public final class ValueConverter {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> boolean factored(Class<T> targetType, Object value, Reference<T> ref) {
+    private static <T> boolean factored(Class<T> targetType, Object value, AtomicReference<T> ref) {
         Method factoryMethod = Stream.of(targetType.getMethods())
                 .filter(m -> Modifier.isPublic(m.getModifiers()) &&
                         Modifier.isStatic(m.getModifiers()) &&
@@ -290,7 +291,7 @@ public final class ValueConverter {
 
         if (factoryMethod != null) {
             try {
-                ref.setTarget((T) factoryMethod.invoke(null, value));
+                ref.set((T) factoryMethod.invoke(null, value));
                 return true;
             } catch (IllegalAccessException | InvocationTargetException ignored) {
             }
@@ -300,7 +301,7 @@ public final class ValueConverter {
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> boolean converted(Class<T> targetType, Object value, Reference<T> ref) {
+    private static <T> boolean converted(Class<T> targetType, Object value, AtomicReference<T> ref) {
         Pattern converterMethodName = Pattern.compile(
                 String.format("^(to|as|get)%s$", targetType.getSimpleName()),
                 Pattern.CASE_INSENSITIVE);
@@ -316,7 +317,7 @@ public final class ValueConverter {
 
         if (converterMethod != null) {
             try {
-                ref.setTarget((T) converterMethod.invoke(value));
+                ref.set((T) converterMethod.invoke(value));
                 return true;
             } catch (IllegalAccessException | InvocationTargetException ignored) {
             }
