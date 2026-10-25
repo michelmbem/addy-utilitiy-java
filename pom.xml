@@ -42,14 +42,14 @@
 
     <distributionManagement>
         <repository>
-            <id>github</id>
-            <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/michelmbem/java-libraries</url>
+            <id>cloudsmith</id>
+            <name>Cloudsmith Releases</name>
+            <url>https://maven.cloudsmith.io/michelmbem/java-libraries/</url>
         </repository>
         <snapshotRepository>
-            <id>github</id>
-            <name>GitHub Packages Snapshots</name>
-            <url>https://maven.pkg.github.com/michelmbem/java-libraries</url>
+            <id>cloudsmith</id>
+            <name>Cloudsmith Snapshots</name>
+            <url>https://maven.cloudsmith.io/michel/java-libraries/</url>
         </snapshotRepository>
     </distributionManagement>
 
