@@ -34,21 +34,22 @@
     </developers>
 
     <scm>
-        <connection>https://github.com/michelmbem/addy-utilitiy-java.git</connection>
-        <tag>HEAD</tag>
+        <connection>scm:git:https://github.com/michelmbem/addy-utilitiy-java.git</connection>
+        <developerConnection>scm:git:https://github.com/michelmbem/addy-utilitiy-java.git</developerConnection>
         <url>https://github.com/michelmbem/addy-utilitiy-java</url>
+        <tag>HEAD</tag>
     </scm>
 
     <distributionManagement>
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/michelmbem/releases</url>
+            <url>https://maven.pkg.github.com/michelmbem/java-libraries</url>
         </repository>
         <snapshotRepository>
             <id>github</id>
             <name>GitHub Packages Snapshots</name>
-            <url>https://maven.pkg.github.com/michelmbem/snapshots</url>
+            <url>https://maven.pkg.github.com/michelmbem/java-libraries</url>
         </snapshotRepository>
     </distributionManagement>
 
