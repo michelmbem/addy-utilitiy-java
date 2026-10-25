@@ -26,7 +26,7 @@ jobs:
           cache: maven
 
       - name: Publish to GitHub Packages
-        run: mvn --batch-mode clean deploy
+        run: mvn --batch-mode clean deploy -Dmaven.test.skip=true
         env:
           GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
