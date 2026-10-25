@@ -43,12 +43,12 @@
         <repository>
             <id>github</id>
             <name>GitHub Packages</name>
-            <url>https://maven.pkg.github.com/michelmbem/addy-utilitiy-java</url>
+            <url>https://maven.pkg.github.com/michelmbem/releases</url>
         </repository>
         <snapshotRepository>
             <id>github</id>
             <name>GitHub Packages Snapshots</name>
-            <url>https://maven.pkg.github.com/michelmbem/addy-utilitiy-java</url>
+            <url>https://maven.pkg.github.com/michelmbem/snapshots</url>
         </snapshotRepository>
     </distributionManagement>
 
