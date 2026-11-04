@@ -3,9 +3,8 @@ package org.addy.util;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Locale;
+import java.util.*;
+import java.util.stream.Stream;
 
 public final class DateUtil {
 	public static final int HOURS_PER_DAY = 24;
@@ -18,6 +17,11 @@ public final class DateUtil {
 	public static final class IsoFormat {
 		private IsoFormat() {}
 
+		public static List<String> all() {
+			// Always try extended before basic ones to prevent some side effects
+			return Stream.of(Extended.all(), Basic.all()).flatMap(List::stream).toList();
+		}
+
 		public static final class Basic {
 			private Basic() {}
 
@@ -27,6 +31,10 @@ public final class DateUtil {
 			public static String DATE = "yyyyMMdd";
 			public static String TIME = "HHmmss";
 			public static String TIME_UTC = TIME + 'Z';
+
+			public static List<String> all() {
+				return List.of(DATETIME, DATETIME_ALT, DATETIME_UTC, DATE, TIME, TIME_UTC);
+			}
 		}
 
 		public static final class Extended {
@@ -38,6 +46,10 @@ public final class DateUtil {
 			public static String DATE = "yyyy-MM-dd";
 			public static String TIME = "HH:mm:ss";
 			public static String TIME_UTC = TIME + 'Z';
+
+			public static List<String> all() {
+				return List.of(DATETIME, DATETIME_ALT, DATETIME_UTC, DATE, TIME, TIME_UTC);
+			}
 		}
 	}
 
@@ -52,10 +64,7 @@ public final class DateUtil {
 		if (minute < 0 || minute > 59) throw new IllegalArgumentException("The minute must be between 0 and 59");
 		if (second < 0 || second > 59) throw new IllegalArgumentException("The second must be between 0 and 59");
 
-		Calendar calendar = Calendar.getInstance();
-		calendar.clear();
-		calendar.set(year, month - 1, day, hour, minute, second);
-		return calendar.getTime();
+		return new GregorianCalendar(year, month - 1, day, hour, minute, second).getTime();
 	}
 
 	public static Date date(int year, int month, int day) {
@@ -387,28 +396,16 @@ public final class DateUtil {
 	}
 
 	public static Date parseDate(String value, Locale locale) throws ParseException {
-		int[] styles = { DateFormat.SHORT, DateFormat.MEDIUM, DateFormat.LONG };
-		DateFormat[] dateFormats = new DateFormat[12 + styles.length * (styles.length + 2)];
-		int index = 0, errorOffset = 0;
-
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.DATETIME);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.DATETIME_ALT);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.DATETIME_UTC);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.DATE);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.TIME);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Extended.TIME_UTC);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.DATETIME);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.DATETIME_ALT);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.DATETIME_UTC);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.DATE);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.TIME);
-		dateFormats[index++] = new SimpleDateFormat(IsoFormat.Basic.TIME_UTC);
+		final List<DateFormat> dateFormats = new ArrayList<>(
+				IsoFormat.all().stream().map(SimpleDateFormat::new).toList());
+		final int[] styles = { DateFormat.SHORT, DateFormat.MEDIUM, DateFormat.LONG };
+		int errorOffset = 0;
 		
 		for (int style1 : styles) {
-			dateFormats[index++] = DateFormat.getDateInstance(style1, locale);
-			dateFormats[index++] = DateFormat.getTimeInstance(style1, locale);
+			dateFormats.add(DateFormat.getDateInstance(style1, locale));
+			dateFormats.add(DateFormat.getTimeInstance(style1, locale));
 			for (int style2 : styles) {
-				dateFormats[index++] = DateFormat.getDateTimeInstance(style1, style2, locale);
+				dateFormats.add(DateFormat.getDateTimeInstance(style1, style2, locale));
 			}
 		}
 
