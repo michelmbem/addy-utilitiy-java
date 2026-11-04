@@ -20,13 +20,34 @@ class CollectionUtilTest {
 
     @Test
     void firstWorks() {
-        assertEquals("one", CollectionUtil.first(LIST).orElse("four"));
+        assertEquals("one", CollectionUtil.first(LIST).orElse("zero"));
+    }
+
+    @Test
+    void firstWithDefaultValueWorks() {
+        assertEquals("zero", CollectionUtil.first(List.of(), "zero"));
     }
 
     @Test
     void requiredFirstWorks() {
         assertEquals("one", CollectionUtil.requiredFirst(LIST));
         assertThrows(NoSuchElementException.class, () -> CollectionUtil.requiredFirst(Collections.emptyList()));
+    }
+
+    @Test
+    void lastWorks() {
+        assertEquals("three", CollectionUtil.last(LIST).orElse("four"));
+    }
+
+    @Test
+    void lastWithDefaultValueWorks() {
+        assertEquals("four", CollectionUtil.last(Set.of(), "four"));
+    }
+
+    @Test
+    void requiredLastWorks() {
+        assertEquals("three", CollectionUtil.requiredLast(LIST));
+        assertThrows(NoSuchElementException.class, () -> CollectionUtil.requiredLast(Collections.emptySet()));
     }
 
     @Test

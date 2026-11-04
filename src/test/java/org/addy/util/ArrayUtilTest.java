@@ -19,13 +19,29 @@ class ArrayUtilTest {
     }
 
     @Test
+    void equalsWorks() {
+        assertTrue(ArrayUtil.equals((byte[]) null, null));
+        assertTrue(ArrayUtil.equals(ARRAY, "one two three".split(" ")));
+    }
+
+    @Test
     void firstWorks() {
         assertEquals("one", ArrayUtil.first(ARRAY).orElse("four"));
     }
 
     @Test
+    void firstWithDefaultValueWorks() {
+        assertEquals("four", ArrayUtil.first(new String[0], "four"));
+    }
+
+    @Test
     void lastWorks() {
         assertEquals("three", ArrayUtil.last(ARRAY).orElse("zero"));
+    }
+
+    @Test
+    void lastWithDefaultValueWorks() {
+        assertEquals("four", ArrayUtil.last(new String[0], "four"));
     }
 
     @Test

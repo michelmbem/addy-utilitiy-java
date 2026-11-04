@@ -2,20 +2,21 @@ package org.addy.util;
 
 import java.io.*;
 import java.util.*;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class FileUtil {
     public static final String DEFAULT_CONTENT_TYPE = "application/octet-stream";
-    private static final String CONTENT_TYPES_RESOURCE = "content-types.properties";
+    private static final String CONTENT_TYPES_RESOURCE = "/content-types.properties";
+    private static final int DEFAULT_BUFFER_SIZE = 1024 * 8;
     private static final Map<String, String> EXTENSION_TO_CONTENT_TYPE;
     private static final Map<String, String> CONTENT_TYPE_TO_EXTENSION;
 
     static {
         var properties = new Properties();
 
-        try (InputStream input = FileUtil.class.getClassLoader()
+        try (InputStream input = FileUtil.class
                 .getResourceAsStream(CONTENT_TYPES_RESOURCE)) {
 
             properties.load(input);
@@ -26,7 +27,7 @@ public final class FileUtil {
         Map<String, String> extensionToContentType = new HashMap<>();
         Map<String, String> contentTypeToExtension = new HashMap<>();
 
-        for (Map.Entry<?, ?> entry : properties.entrySet()) {
+        for (Map.Entry<Object, Object> entry : properties.entrySet()) {
             String extension = entry.getKey().toString();
             String contentType = entry.getValue().toString();
             extensionToContentType.put(extension, contentType);
@@ -60,7 +61,7 @@ public final class FileUtil {
     }
 
     public static String getFileName(String path) {
-        return (new File(path)).getName();
+        return new File(path).getName();
     }
 
     public static String getExtension(String fileName) {
@@ -121,12 +122,10 @@ public final class FileUtil {
     }
 
     public static boolean move(String source, String dest) {
-        return (new File(source)).renameTo(new File(dest));
+        return new File(source).renameTo(new File(dest));
     }
 
-    public static int copyStream(InputStream input, OutputStream output, int bufferSize)
-            throws IOException {
-
+    public static int copy(InputStream input, OutputStream output, int bufferSize) throws IOException {
         if (input == null) throw new IllegalArgumentException("The input stream cannot be null");
         if (output == null) throw new IllegalArgumentException("The output stream cannot be null");
         if (bufferSize <= 0) throw new IllegalArgumentException("The buffer size should be positive");
@@ -142,8 +141,28 @@ public final class FileUtil {
         return total;
     }
 
-    public static int copyStream(InputStream input, OutputStream output) throws IOException {
-        return copyStream(input, output, 8192);
+    public static int copy(InputStream input, OutputStream output) throws IOException {
+        return copy(input, output, DEFAULT_BUFFER_SIZE);
+    }
+
+    public static int copy(Reader reader, Writer writer, int bufferSize) throws IOException {
+        if (reader == null) throw new IllegalArgumentException("The reader stream cannot be null");
+        if (writer == null) throw new IllegalArgumentException("The writer stream cannot be null");
+        if (bufferSize <= 0) throw new IllegalArgumentException("The buffer size should be positive");
+
+        var buffer = new char[bufferSize];
+        int amount, total = 0;
+
+        while ((amount = reader.read(buffer)) > 0) {
+            writer.write(buffer, 0, amount);
+            total += amount;
+        }
+
+        return total;
+    }
+
+    public static int copy(Reader reader, Writer writer) throws IOException {
+        return copy(reader, writer, DEFAULT_BUFFER_SIZE);
     }
 
     public static boolean copy(File sourceFile, File destFile) throws IOException {
@@ -156,7 +175,7 @@ public final class FileUtil {
             if (!(destFile.isDirectory() || destFile.mkdirs()))
                 return false;
 
-            for (File childFile : sourceFile.listFiles()) {
+            for (File childFile : Objects.requireNonNull(sourceFile.listFiles())) {
                 if (!copy(childFile, new File(destFile, childFile.getName())))
                     return false;
             }
@@ -170,7 +189,7 @@ public final class FileUtil {
 
         try (InputStream input = new FileInputStream(sourceFile)) {
             try (OutputStream output = new FileOutputStream(destFile)) {
-                copyStream(input, output);
+                copy(input, output);
             }
         }
 
@@ -183,7 +202,7 @@ public final class FileUtil {
 
     public static boolean delete(File file) {
         if (file.isDirectory()) {
-            for (File childFile : file.listFiles()) {
+            for (File childFile : Objects.requireNonNull(file.listFiles())) {
                 if (!delete(childFile))
                     return false;
             }
@@ -199,7 +218,7 @@ public final class FileUtil {
     public static void walkTree(File rootNode, FileFilter filter, TreeWalker treeWalker) {
         if (rootNode.isDirectory()) {
             if (treeWalker.beforeEnteringDirectory(rootNode)) {
-                for (File childNode : rootNode.listFiles(filter)) {
+                for (File childNode : Objects.requireNonNull(rootNode.listFiles(filter))) {
                     walkTree(childNode, filter, treeWalker);
                 }
                 treeWalker.afterExitingDirectory(rootNode);
@@ -229,7 +248,7 @@ public final class FileUtil {
         return new BufferedReader(new FileReader(path));
     }
 
-    public static Scanner openScanner(String path) throws FileNotFoundException {
+    public static Scanner scan(String path) throws FileNotFoundException {
         return new Scanner(openText(path));
     }
 
@@ -243,7 +262,7 @@ public final class FileUtil {
 
     public static byte[] readAllBytes(InputStream input) throws IOException {
         try (var output = new ByteArrayOutputStream()) {
-            copyStream(input, output);
+            copy(input, output);
             return output.toByteArray();
         }
     }
@@ -261,14 +280,10 @@ public final class FileUtil {
     }
 
     public static String readAllText(InputStream input) throws IOException {
-        String newLine = String.format("%n");
-        String text;
-
+        final String newLine = String.format("%n");
         try (var reader = new BufferedReader(new InputStreamReader(input))) {
-            text = reader.lines().collect(Collectors.joining(newLine));
+            return reader.lines().collect(Collectors.joining(newLine));
         }
-
-        return text;
     }
 
     public static String readAllText(File file) throws IOException {
@@ -283,45 +298,21 @@ public final class FileUtil {
         }
     }
 
-    public static String[] readAllLines(InputStream input) throws IOException {
-        String[] lines;
-
+    public static Stream<String> readAllLines(InputStream input) throws IOException {
         try (var reader = new BufferedReader(new InputStreamReader(input))) {
-            lines = reader.lines().toArray(String[]::new);
+            return reader.lines();
         }
-
-        return lines;
     }
 
-    public static String[] readAllLines(File file) throws IOException {
+    public static Stream<String> readAllLines(File file) throws IOException {
         try (var input = new FileInputStream(file)) {
             return readAllLines(input);
         }
     }
 
-    public static String[] readAllLines(String path) throws IOException {
+    public static Stream<String> readAllLines(String path) throws IOException {
         try (var input = new FileInputStream(path)) {
             return readAllLines(input);
-        }
-    }
-
-    public static void forEachLine(InputStream input, Consumer<String> consumer)
-            throws IOException {
-
-        try (var reader = new BufferedReader(new InputStreamReader(input))) {
-            reader.lines().forEach(consumer);
-        }
-    }
-
-    public static void forEachLine(File file, Consumer<String> consumer) throws IOException {
-        try (var input = new FileInputStream(file)) {
-            forEachLine(input, consumer);
-        }
-    }
-
-    public static void forEachLine(String path, Consumer<String> consumer) throws IOException {
-        try (var input = new FileInputStream(path)) {
-            forEachLine(input, consumer);
         }
     }
 
