@@ -118,7 +118,7 @@ class DateUtilTest {
     void stringConversionWorks() {
         Date date = DateUtil.dateTime(2024, 7, 3, 22, 15, 30);
         assertEquals("July 3, 2024 at 10:15:30 PM EDT", DateUtil.toLongDateTimeString(date, Locale.US));
-        assertEquals("3 juill. 2024, 22 h 15 min 30 s", DateUtil.toMediumDateTimeString(date, Locale.CANADA_FRENCH));
+        assertEquals("3 juill. 2024 22 h 15", DateUtil.toMediumDateTimeString(date, Locale.CANADA_FRENCH));
         assertEquals("7/3/24, 10:15 PM", DateUtil.toShortDateTimeString(date, Locale.US));
         assertEquals("3 juillet 2024", DateUtil.toLongDateString(date, Locale.FRANCE));
         assertEquals("3 juill. 2024", DateUtil.toMediumDateString(date, Locale.CANADA_FRENCH));

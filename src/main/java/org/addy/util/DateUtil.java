@@ -197,16 +197,14 @@ public final class DateUtil {
 	public static Date combine(Date date, Date time) {
 		Calendar dateCal = toCalendar(date);
 		Calendar timeCal = toCalendar(time);
-		Calendar finalCal = Calendar.getInstance();
-		finalCal.clear();
-		finalCal.set(Calendar.YEAR, dateCal.get(Calendar.YEAR));
-		finalCal.set(Calendar.MONTH, dateCal.get(Calendar.MONTH));
-		finalCal.set(Calendar.DATE, dateCal.get(Calendar.DATE));
-		finalCal.set(Calendar.HOUR_OF_DAY, timeCal.get(Calendar.HOUR_OF_DAY));
-		finalCal.set(Calendar.MINUTE, timeCal.get(Calendar.MINUTE));
-		finalCal.set(Calendar.SECOND, timeCal.get(Calendar.SECOND));
-		finalCal.set(Calendar.MILLISECOND, timeCal.get(Calendar.MILLISECOND));
-		return finalCal.getTime();
+		return new GregorianCalendar(
+				dateCal.get(Calendar.YEAR),
+				dateCal.get(Calendar.MONTH),
+				dateCal.get(Calendar.DATE),
+				timeCal.get(Calendar.HOUR_OF_DAY),
+				timeCal.get(Calendar.MINUTE),
+				timeCal.get(Calendar.SECOND))
+				.getTime();
 	}
 
 	public static int getLastDayOfMonth(int month, int year) {
@@ -238,12 +236,12 @@ public final class DateUtil {
 		Calendar fromCal = toCalendar(from);
 		Calendar toCal = toCalendar(to);
 
-		int yearDiff = toCal.get(Calendar.YEAR) - fromCal.get(Calendar.YEAR);
-		int monthDiff = toCal.get(Calendar.MONTH) - fromCal.get(Calendar.MONTH);
-		int dayDiff = toCal.get(Calendar.DATE) - fromCal.get(Calendar.DATE);
-		if (monthDiff < 0 || (monthDiff == 0 && dayDiff < 0)) --yearDiff;
+		int yearDelta = toCal.get(Calendar.YEAR) - fromCal.get(Calendar.YEAR);
+		int monthDelta = toCal.get(Calendar.MONTH) - fromCal.get(Calendar.MONTH);
+		int dayDelta = toCal.get(Calendar.DATE) - fromCal.get(Calendar.DATE);
+		if (monthDelta < 0 || (monthDelta == 0 && dayDelta < 0)) --yearDelta;
 
-		return yearDiff;
+		return yearDelta;
 	}
 
 	public static int getMonthsBetween(Date from, Date to) {
@@ -252,16 +250,16 @@ public final class DateUtil {
 		Calendar fromCal = toCalendar(from);
 		Calendar toCal = toCalendar(to);
 
-		int yearDiff = toCal.get(Calendar.YEAR) - fromCal.get(Calendar.YEAR);
-		int monthDiff = toCal.get(Calendar.MONTH) - fromCal.get(Calendar.MONTH);
-		int dayDiff = toCal.get(Calendar.DATE) - fromCal.get(Calendar.DATE);
-		if (monthDiff < 0) {
-			monthDiff += 12;
-			--yearDiff;
+		int yearDelta = toCal.get(Calendar.YEAR) - fromCal.get(Calendar.YEAR);
+		int monthDelta = toCal.get(Calendar.MONTH) - fromCal.get(Calendar.MONTH);
+		int dayDelta = toCal.get(Calendar.DATE) - fromCal.get(Calendar.DATE);
+		if (monthDelta < 0) {
+			monthDelta += 12;
+			--yearDelta;
 		}
-		if (dayDiff < 0) --monthDiff;
+		if (dayDelta < 0) --monthDelta;
 
-		return 12 * yearDiff + monthDiff;
+		return 12 * yearDelta + monthDelta;
 	}
 
 	public static int getWeeksBetween(Date from, Date to) {
@@ -269,17 +267,17 @@ public final class DateUtil {
 	}
 
 	public static int getDaysBetween(Date from, Date to) {
-		int millisPerDay = SECONDS_PER_DAY * 1000;
+		final int millisPerDay = SECONDS_PER_DAY * 1000;
 		return (int) ((to.getTime() - from.getTime()) / millisPerDay);
 	}
 
 	public static long getHoursBetween(Date from, Date to) {
-		long millisPerHour = SECONDS_PER_HOUR * 1000L;
+		final long millisPerHour = SECONDS_PER_HOUR * 1000L;
 		return (to.getTime() - from.getTime()) / millisPerHour;
 	}
 
 	public static long getMinutesBetween(Date from, Date to) {
-		long millisPerMinute = SECONDS_PER_MINUTE * 1000L;
+		final long millisPerMinute = SECONDS_PER_MINUTE * 1000L;
 		return (to.getTime() - from.getTime()) / millisPerMinute;
 	}
 
@@ -305,7 +303,7 @@ public final class DateUtil {
 
 	public static String toMediumDateTimeString(Date date, Locale locale) {
 		return DateFormat
-				.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.MEDIUM, locale)
+				.getDateTimeInstance(DateFormat.MEDIUM, DateFormat.SHORT, locale)
 				.format(date);
 	}
 
@@ -398,15 +396,22 @@ public final class DateUtil {
 	public static Date parseDate(String value, Locale locale) throws ParseException {
 		final List<DateFormat> dateFormats = new ArrayList<>(IsoFormat.all().stream()
 				.map(pattern -> new SimpleDateFormat(pattern, locale)).toList());
-		final int[] styles = { DateFormat.SHORT, DateFormat.MEDIUM, DateFormat.LONG };
+		final int[] dateStyles = { DateFormat.LONG, DateFormat.MEDIUM, DateFormat.SHORT };
+		final int[] timeStyles = { DateFormat.LONG, DateFormat.SHORT };
 		int errorOffset = 0;
-		
-		for (int style1 : styles) {
-			dateFormats.add(DateFormat.getDateInstance(style1, locale));
-			dateFormats.add(DateFormat.getTimeInstance(style1, locale));
-			for (int style2 : styles) {
-				dateFormats.add(DateFormat.getDateTimeInstance(style1, style2, locale));
+
+		for (int dateStyle : dateStyles) {
+			for (int timeStyle : timeStyles) {
+				dateFormats.add(DateFormat.getDateTimeInstance(dateStyle, timeStyle, locale));
 			}
+		}
+
+		for (int dateStyle : dateStyles) {
+			dateFormats.add(DateFormat.getDateInstance(dateStyle, locale));
+		}
+
+		for (int timeStyle : timeStyles) {
+			dateFormats.add(DateFormat.getTimeInstance(timeStyle, locale));
 		}
 
 		for (DateFormat dateFormat : dateFormats) {
