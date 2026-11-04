@@ -265,7 +265,8 @@ public final class ImageHelper {
         try (var output = new ByteArrayOutputStream()) {
             ImageIO.write(buffer(image, imageType), format, output);
             return output.toByteArray();
-        } catch (IOException ignored) {
+        } catch (IOException ex) {
+            ex.printStackTrace();
             return new byte[0];
         }
     }
@@ -277,7 +278,8 @@ public final class ImageHelper {
     public static Image fromByteArray(byte[] bytes) {
         try (var input = new ByteArrayInputStream(bytes)) {
             return ImageIO.read(input);
-        } catch (IOException ignored) {
+        } catch (IOException ex) {
+            ex.printStackTrace();
             return null;
         }
     }
