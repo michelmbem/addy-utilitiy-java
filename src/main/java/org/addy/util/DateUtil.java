@@ -396,8 +396,8 @@ public final class DateUtil {
 	}
 
 	public static Date parseDate(String value, Locale locale) throws ParseException {
-		final List<DateFormat> dateFormats = new ArrayList<>(
-				IsoFormat.all().stream().map(SimpleDateFormat::new).toList());
+		final List<DateFormat> dateFormats = new ArrayList<>(IsoFormat.all().stream()
+				.map(pattern -> new SimpleDateFormat(pattern, locale)).toList());
 		final int[] styles = { DateFormat.SHORT, DateFormat.MEDIUM, DateFormat.LONG };
 		int errorOffset = 0;
 		
