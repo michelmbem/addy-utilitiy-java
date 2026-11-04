@@ -8,6 +8,7 @@ import java.awt.*;
 import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.Base64;
@@ -254,6 +255,31 @@ public final class ImageHelper {
         g.dispose();
 
         return sprite;
+    }
+
+    public static byte[] toByteArray(Image image, String format) {
+        int imageType = "png".equals(format) || "gif".equals(format)
+                ? BufferedImage.TYPE_INT_ARGB
+                : BufferedImage.TYPE_INT_RGB;
+
+        try (var output = new ByteArrayOutputStream()) {
+            ImageIO.write(buffer(image, imageType), format, output);
+            return output.toByteArray();
+        } catch (IOException ignored) {
+            return new byte[0];
+        }
+    }
+
+    public static byte[] toByteArray(Image image) {
+        return toByteArray(image, "png");
+    }
+
+    public static Image fromByteArray(byte[] bytes) {
+        try (var input = new ByteArrayInputStream(bytes)) {
+            return ImageIO.read(input);
+        } catch (IOException ignored) {
+            return null;
+        }
     }
 
     public static String toBase64DataURL(File imageFile) throws IOException {
