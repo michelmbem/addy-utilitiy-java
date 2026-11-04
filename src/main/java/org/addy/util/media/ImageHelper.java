@@ -54,6 +54,7 @@ public final class ImageHelper {
             resizedImage = new BufferedImage(effectiveWidth, effectiveHeight, BufferedImage.TYPE_INT_RGB);
             var g = (Graphics2D) resizedImage.getGraphics();
 			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g.drawImage(originalImage, 0, 0, effectiveWidth, effectiveHeight,
                     0, 0, width, height, null);
             g.dispose();
@@ -61,6 +62,7 @@ public final class ImageHelper {
             resizedImage = new BufferedImage(desiredWidth, desiredHeight, BufferedImage.TYPE_INT_RGB);
             var g = (Graphics2D) resizedImage.getGraphics();
 			g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+            g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
             g.drawImage(originalImage, 0, 0, desiredWidth, desiredHeight,
                     0, 0, width, height, null);
             g.dispose();
@@ -160,9 +162,10 @@ public final class ImageHelper {
         int width = originalWidth + borderInsets.left + borderInsets.right;
         int height = originalHeight + borderInsets.top + borderInsets.bottom;
         var imageWithBorder = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        var g = (Graphics2D) imageWithBorder.getGraphics();
 
+        var g = (Graphics2D) imageWithBorder.getGraphics();
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.setPaint(borderPaint);
         g.fillRect(0, 0, width, height);
         g.drawImage(originalImage, borderInsets.left, borderInsets.top, originalWidth, originalHeight, null);
@@ -183,6 +186,7 @@ public final class ImageHelper {
         var image = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         var g = (Graphics2D) image.getGraphics();
         g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
         g.setPaint(background);
         g.fillRect(0, 0, width, height);
 
