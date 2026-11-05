@@ -41,7 +41,7 @@ public final class JpegImageHelper {
 
             return directory != null
                     ? ImageOrientation.values()[
-                    directory.getInt(ExifDirectoryBase.TAG_ORIENTATION)]
+                            directory.getInt(ExifDirectoryBase.TAG_ORIENTATION)]
                     : ImageOrientation.UNDETERMINED;
         } catch (IOException | MetadataException | JpegProcessingException e) {
             e.printStackTrace();
