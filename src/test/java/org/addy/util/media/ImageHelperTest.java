@@ -20,7 +20,7 @@ class ImageHelperTest {
 	@BeforeAll
 	static void setup() {
 		String[] names = {"jordan", "daniel"};
-		String[] modifiers = {"corrected", "gs", "sepia", "flipped"};
+		String[] modifiers = {"corrected", "gs", "sepia", "flipped", "bordered", "stripped"};
 		String[] generated = {"tiles", "sprite"};
 		FileFilter filter = new FileUtil.PatternFilter("tenor-frame-\\d+\\.png");
 		File file;
@@ -155,6 +155,27 @@ class ImageHelperTest {
 				assertTrue(destFile.isFile());
 				++i;
 			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	@Order(6)
+	void canAddAndStripBorder() {
+		try {
+			File srcFile = new File("files/daniel-corrected.jpg");
+			File destFile1 = new File("files/daniel-bordered.jpg");
+			File destFile2 = new File("files/daniel-stripped.jpg");
+			Image srcImage = ImageIO.read(srcFile);
+
+			Image destImage1 = ImageHelper.addBorder(srcImage, Color.LIGHT_GRAY, InsetsFactory.uniform(20));
+			ImageIO.write((RenderedImage) destImage1, JpegImageHelper.FORMAT, destFile1);
+			assertTrue(destFile1.isFile());
+
+			Image destImage2 = ImageHelper.stripBorder(destImage1, Color.LIGHT_GRAY);
+			ImageIO.write((RenderedImage) destImage2, JpegImageHelper.FORMAT, destFile2);
+			assertTrue(destFile2.isFile());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
