@@ -1,9 +1,6 @@
 package org.addy.util.media;
 
+import java.awt.*;
 import java.awt.image.BufferedImage;
 
-public record ImageFrame(BufferedImage image, int delay, String disposal, int width, int height) {
-    public ImageFrame(BufferedImage image) {
-        this(image, -1, null, -1, -1);
-    }
-}
+public record ImageFrame(BufferedImage image, Rectangle bounds, int delay, String disposal) {}

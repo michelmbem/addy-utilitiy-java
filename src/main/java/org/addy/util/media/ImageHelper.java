@@ -503,25 +503,24 @@ public final class ImageHelper {
             try {
                 reader.setInput(input, false, false);
 
-                int width = -1, height = -1;
+                int width = -1;
+                int height = -1;
                 Color background = null;
+
                 IIOMetadata streamMetadata = reader.getStreamMetadata();
-
                 if (streamMetadata != null) {
-                    IIOMetadataNode root = (IIOMetadataNode) streamMetadata.getAsTree(
-                            streamMetadata.getNativeMetadataFormatName());
-                    NodeList descriptors = root.getElementsByTagName("LogicalScreenDescriptor");
+                    var root = (IIOMetadataNode) streamMetadata.getAsTree(streamMetadata.getNativeMetadataFormatName());
 
+                    NodeList descriptors = root.getElementsByTagName("LogicalScreenDescriptor");
                     if (descriptors.getLength() > 0) {
-                        IIOMetadataNode descriptor = (IIOMetadataNode) descriptors.item(0);
+                        var descriptor = (IIOMetadataNode) descriptors.item(0);
                         width = Integer.parseInt(descriptor.getAttribute("logicalScreenWidth"));
                         height = Integer.parseInt(descriptor.getAttribute("logicalScreenHeight"));
                     }
 
                     NodeList tables = root.getElementsByTagName("GlobalColorTable");
-
                     if (tables.getLength() > 0) {
-                        IIOMetadataNode table = (IIOMetadataNode) tables.item(0);
+                        var table = (IIOMetadataNode) tables.item(0);
                         String backgroundIndex = table.getAttribute("backgroundColorIndex");
 
                         for (Node node = table.getFirstChild(); node != null; node = node.getNextSibling()) {
@@ -545,7 +544,7 @@ public final class ImageHelper {
                 Rectangle previousBounds = null;
                 String previousDisposal = null;
 
-                for (int i = 0; i < frameCount; i++) {
+                for (int i = 0; i < frameCount; ++i) {
                     if (canvas == null) {
                         BufferedImage frame = reader.read(i);
                         if (width < 0 || height < 0) {
@@ -555,7 +554,7 @@ public final class ImageHelper {
                         canvas = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
                         if (background != null) {
                             Graphics2D g = canvas.createGraphics();
-                            g.setColor(background);
+                            g.setPaint(background);
                             g.fillRect(0, 0, width, height);
                             g.dispose();
                         }
@@ -563,7 +562,7 @@ public final class ImageHelper {
 
                     if (previousDisposal != null) {
                         if ("restoreToPrevious".equals(previousDisposal)) {
-                            canvas = copy(restoreCanvas);
+                            canvas = restoreCanvas;
                         } else if ("restoreToBackgroundColor".equals(previousDisposal)) {
                             Graphics2D g = canvas.createGraphics();
                             g.setComposite(AlphaComposite.Clear);
@@ -574,8 +573,8 @@ public final class ImageHelper {
 
                     BufferedImage frame = reader.read(i);
                     IIOMetadata metadata = reader.getImageMetadata(i);
-                    IIOMetadataNode root = (IIOMetadataNode) metadata.getAsTree("javax_imageio_gif_image_1.0");
-                    IIOMetadataNode gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
+                    var root = (IIOMetadataNode) metadata.getAsTree("javax_imageio_gif_image_1.0");
+                    var gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
                     String disposal = gce.getAttribute("disposalMethod");
                     int delay = Integer.parseInt(gce.getAttribute("delayTime"));
                     NodeList descriptors = root.getElementsByTagName("ImageDescriptor");
@@ -590,7 +589,7 @@ public final class ImageHelper {
                     g.drawImage(frame, x, y, null);
                     g.dispose();
 
-                    frames.add(new ImageFrame(copy(canvas), delay, disposal, frame.getWidth(), frame.getHeight()));
+                    frames.add(new ImageFrame(copy(canvas), previousBounds, delay, disposal));
                 }
 
                 return frames;
