@@ -7,8 +7,12 @@ import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.RenderedImage;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.util.Objects;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
@@ -16,8 +20,9 @@ class ImageHelperTest {
 	@BeforeAll
 	static void setup() {
 		String[] names = {"jordan", "daniel"};
-		String[] modifiers = {"corrected", "gs", "flipped"};
+		String[] modifiers = {"corrected", "gs", "sepia", "flipped"};
 		String[] generated = {"tiles", "sprite"};
+		FileFilter filter = new FileUtil.PatternFilter("tenor-frame-\\d+\\.png");
 		File file;
 
 		for (String name : names) {
@@ -30,6 +35,11 @@ class ImageHelperTest {
 		for (String basename : generated) {
 			file = new File("files/" + basename + ".jpg");
 			if (file.exists()) file.delete();
+		}
+
+		file = new File("files");
+		for (File frame : Objects.requireNonNull(file.listFiles(filter))) {
+			frame.delete();
 		}
 	}
 
@@ -111,6 +121,40 @@ class ImageHelperTest {
 					new Insets(0, 0, 0, 0));
 			ImageIO.write((RenderedImage) sprite, JpegImageHelper.FORMAT, spriteFile);
 			assertTrue(spriteFile.exists());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	@Order(6)
+	void canSepia() {
+		try {
+			File srcFile = new File("files/daniel-corrected.jpg");
+			File destFile = new File("files/daniel-sepia.jpg");
+			Image srcImage = ImageIO.read(srcFile);
+			Image destImage = ImageHelper.sepia(srcImage);
+			ImageIO.write((RenderedImage) destImage, JpegImageHelper.FORMAT, destFile);
+			assertTrue(destFile.isFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	@Order(7)
+	void canExtractFrames() {
+		try (var input = new FileInputStream("files/tenor.gif")) {
+			var frames = ImageHelper.extractFrames(input);
+			assertThat(frames).isNotEmpty();
+
+			int i = 1;
+			for (ImageFrame frame : frames) {
+				var destFile = new File(String.format("files/tenor-frame-%02d.png", i));
+				ImageIO.write(frame.image(), "png", destFile);
+				assertTrue(destFile.isFile());
+				++i;
+			}
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
