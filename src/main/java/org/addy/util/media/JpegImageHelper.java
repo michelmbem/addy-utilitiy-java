@@ -39,10 +39,9 @@ public final class JpegImageHelper {
             Metadata metadata = JpegMetadataReader.readMetadata(file, readers);
             Directory directory = metadata.getFirstDirectoryOfType(ExifIFD0Directory.class);
 
-            return directory != null
-                    ? ImageOrientation.values()[
-                            directory.getInt(ExifDirectoryBase.TAG_ORIENTATION)]
-                    : ImageOrientation.UNDETERMINED;
+            return directory == null
+                    ? ImageOrientation.UNDETERMINED
+                    : ImageOrientation.values()[directory.getInt(ExifDirectoryBase.TAG_ORIENTATION)];
         } catch (IOException | MetadataException | JpegProcessingException e) {
             e.printStackTrace();
             return ImageOrientation.UNDETERMINED;
