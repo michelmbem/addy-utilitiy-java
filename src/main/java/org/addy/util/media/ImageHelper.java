@@ -489,7 +489,7 @@ public final class ImageHelper {
      * applying the GIF frame offsets and disposal instructions.
      *
      * @param stream input stream containing GIF data; the stream is closed when this method returns
-     * @return frames in playback order, including each frame's delay, disposal method, and dimensions
+     * @return frames in playback order, including each frame's delay
      * @throws IOException if the stream cannot be read or no GIF reader is available
      */
     public static List<ImageFrame> extractFrames(InputStream stream) throws IOException {
@@ -509,7 +509,8 @@ public final class ImageHelper {
 
                 IIOMetadata streamMetadata = reader.getStreamMetadata();
                 if (streamMetadata != null) {
-                    var root = (IIOMetadataNode) streamMetadata.getAsTree(streamMetadata.getNativeMetadataFormatName());
+                    var root = (IIOMetadataNode) streamMetadata
+                            .getAsTree(streamMetadata.getNativeMetadataFormatName());
 
                     NodeList descriptors = root.getElementsByTagName("LogicalScreenDescriptor");
                     if (descriptors.getLength() > 0) {
@@ -526,7 +527,8 @@ public final class ImageHelper {
                         for (Node node = table.getFirstChild(); node != null; node = node.getNextSibling()) {
                             if (node instanceof IIOMetadataNode entry
                                     && entry.getAttribute("index").equals(backgroundIndex)) {
-                                background = new Color(Integer.parseInt(entry.getAttribute("red")),
+                                background = new Color(
+                                        Integer.parseInt(entry.getAttribute("red")),
                                         Integer.parseInt(entry.getAttribute("green")),
                                         Integer.parseInt(entry.getAttribute("blue")));
                                 break;
@@ -540,9 +542,9 @@ public final class ImageHelper {
 
                 List<ImageFrame> frames = new ArrayList<>(frameCount);
                 BufferedImage canvas = null;
-                BufferedImage previousCanvas = null;
-                Rectangle previousBounds = null;
-                String previousDisposal = null;
+                BufferedImage restoreCanvas = null;
+                Rectangle bounds = null;
+                String disposalMethod = null;
 
                 for (int i = 0; i < frameCount; ++i) {
                     BufferedImage frame = reader.read(i);
@@ -561,13 +563,13 @@ public final class ImageHelper {
                         }
                     }
 
-                    if (previousDisposal != null) {
-                        switch (previousDisposal) {
-                            case "restoreToPrevious" -> canvas = previousCanvas;
+                    if (disposalMethod != null) {
+                        switch (disposalMethod) {
+                            case "restoreToPrevious" -> canvas = restoreCanvas;
                             case "restoreToBackgroundColor" -> {
                                 Graphics2D g = canvas.createGraphics();
                                 g.setComposite(AlphaComposite.Clear);
-                                g.fill(previousBounds);
+                                g.fill(bounds);
                                 g.dispose();
                             }
                         }
@@ -576,22 +578,20 @@ public final class ImageHelper {
                     IIOMetadata metadata = reader.getImageMetadata(i);
                     var root = (IIOMetadataNode) metadata.getAsTree("javax_imageio_gif_image_1.0");
                     var gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
-                    String disposal = gce.getAttribute("disposalMethod");
+                    disposalMethod = gce.getAttribute("disposalMethod");
                     int delay = Integer.parseInt(gce.getAttribute("delayTime"));
                     NodeList descriptors = root.getElementsByTagName("ImageDescriptor");
                     NamedNodeMap attrs = descriptors.item(0).getAttributes();
                     int x = Integer.parseInt(attrs.getNamedItem("imageLeftPosition").getNodeValue());
                     int y = Integer.parseInt(attrs.getNamedItem("imageTopPosition").getNodeValue());
-                    var bounds = new Rectangle(x, y, frame.getWidth(), frame.getHeight());
+                    bounds = new Rectangle(x, y, frame.getWidth(), frame.getHeight());
+                    restoreCanvas = "restoreToPrevious".equals(disposalMethod) ? copy(canvas) : null;
 
                     Graphics2D g = canvas.createGraphics();
                     g.drawImage(frame, x, y, null);
                     g.dispose();
 
-                    frames.add(new ImageFrame(copy(canvas), bounds, delay, disposal));
-                    previousCanvas = "restoreToPrevious".equals(disposal) ? copy(canvas) : null;
-                    previousBounds = bounds;
-                    previousDisposal = disposal;
+                    frames.add(new ImageFrame(copy(canvas), delay));
                 }
 
                 return frames;
