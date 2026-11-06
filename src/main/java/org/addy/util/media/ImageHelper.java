@@ -540,13 +540,14 @@ public final class ImageHelper {
 
                 List<ImageFrame> frames = new ArrayList<>(frameCount);
                 BufferedImage canvas = null;
-                BufferedImage restoreCanvas = null;
+                BufferedImage previousCanvas = null;
                 Rectangle previousBounds = null;
                 String previousDisposal = null;
 
                 for (int i = 0; i < frameCount; ++i) {
+                    BufferedImage frame = reader.read(i);
+
                     if (canvas == null) {
-                        BufferedImage frame = reader.read(i);
                         if (width < 0 || height < 0) {
                             width = frame.getWidth();
                             height = frame.getHeight();
@@ -561,17 +562,17 @@ public final class ImageHelper {
                     }
 
                     if (previousDisposal != null) {
-                        if ("restoreToPrevious".equals(previousDisposal)) {
-                            canvas = restoreCanvas;
-                        } else if ("restoreToBackgroundColor".equals(previousDisposal)) {
-                            Graphics2D g = canvas.createGraphics();
-                            g.setComposite(AlphaComposite.Clear);
-                            g.fill(previousBounds);
-                            g.dispose();
+                        switch (previousDisposal) {
+                            case "restoreToPrevious" -> canvas = previousCanvas;
+                            case "restoreToBackgroundColor" -> {
+                                Graphics2D g = canvas.createGraphics();
+                                g.setComposite(AlphaComposite.Clear);
+                                g.fill(previousBounds);
+                                g.dispose();
+                            }
                         }
                     }
 
-                    BufferedImage frame = reader.read(i);
                     IIOMetadata metadata = reader.getImageMetadata(i);
                     var root = (IIOMetadataNode) metadata.getAsTree("javax_imageio_gif_image_1.0");
                     var gce = (IIOMetadataNode) root.getElementsByTagName("GraphicControlExtension").item(0);
@@ -581,15 +582,16 @@ public final class ImageHelper {
                     NamedNodeMap attrs = descriptors.item(0).getAttributes();
                     int x = Integer.parseInt(attrs.getNamedItem("imageLeftPosition").getNodeValue());
                     int y = Integer.parseInt(attrs.getNamedItem("imageTopPosition").getNodeValue());
-                    previousBounds = new Rectangle(x, y, frame.getWidth(), frame.getHeight());
-                    previousDisposal = disposal;
-                    restoreCanvas = "restoreToPrevious".equals(disposal) ? copy(canvas) : null;
+                    var bounds = new Rectangle(x, y, frame.getWidth(), frame.getHeight());
 
                     Graphics2D g = canvas.createGraphics();
                     g.drawImage(frame, x, y, null);
                     g.dispose();
 
-                    frames.add(new ImageFrame(copy(canvas), previousBounds, delay, disposal));
+                    frames.add(new ImageFrame(copy(canvas), bounds, delay, disposal));
+                    previousCanvas = "restoreToPrevious".equals(disposal) ? copy(canvas) : null;
+                    previousBounds = bounds;
+                    previousDisposal = disposal;
                 }
 
                 return frames;
