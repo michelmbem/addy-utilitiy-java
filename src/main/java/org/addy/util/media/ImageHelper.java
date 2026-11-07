@@ -26,6 +26,9 @@ import java.util.List;
  * This class is not intended to be instantiated.
  */
 public final class ImageHelper {
+    /** Maximum allowed difference in each RGB channel when matching a border color. */
+    private static final int COLOR_TOLERANCE = 10;
+
     /** Prevents instances of this utility class from being created. */
     private ImageHelper() {}
 
@@ -702,20 +705,27 @@ public final class ImageHelper {
                 x, y, x + w, y + h, null);
 	}
 
-    /** Returns whether every pixel in the specified row exactly matches the given RGB value. */
+    /** Returns whether every pixel in the specified row is within the color tolerance. */
     private static boolean rowHasColor(BufferedImage image, int rgb, int y, int width) {
         for (int x = 0; x < width; ++x) {
-            if (image.getRGB(x, y) != rgb) return false;
+            if (!colorsMatch(image.getRGB(x, y), rgb)) return false;
         }
         return true;
     }
 
-    /** Returns whether every pixel in the specified column exactly matches the given RGB value. */
+    /** Returns whether every pixel in the specified column is within the color tolerance. */
     private static boolean columnHasColor(BufferedImage image, int rgb, int x, int height) {
         for (int y = 0; y < height; ++y) {
-            if (image.getRGB(x, y) != rgb) return false;
+            if (!colorsMatch(image.getRGB(x, y), rgb)) return false;
         }
         return true;
+    }
+
+    /** Matches two colors when the absolute difference in each RGB channel is at most the tolerance. */
+    private static boolean colorsMatch(int first, int second) {
+        return Math.abs(((first >> 16) & 0xff) - ((second >> 16) & 0xff)) <= COLOR_TOLERANCE
+                && Math.abs(((first >> 8) & 0xff) - ((second >> 8) & 0xff)) <= COLOR_TOLERANCE
+                && Math.abs((first & 0xff) - (second & 0xff)) <= COLOR_TOLERANCE;
     }
 
 }
