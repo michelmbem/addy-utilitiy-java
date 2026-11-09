@@ -199,8 +199,8 @@ public final class ImageHelper {
      */
     public static Image crop(Image originalImage, Rectangle frame) {
         if (frame.x < 0 || frame.y < 0
-                || frame.width > originalImage.getWidth(null)
-                || frame.height > originalImage.getHeight(null))
+                || frame.getMaxX() > originalImage.getWidth(null)
+                || frame.getMaxY() > originalImage.getHeight(null))
             throw new IllegalArgumentException("Crop bounds exceed the original image size");
 
         if (frame.width <= 0 || frame.height <= 0)
@@ -209,7 +209,7 @@ public final class ImageHelper {
         Image croppedImage = new BufferedImage(frame.width, frame.height, BufferedImage.TYPE_INT_RGB);
         var g = (Graphics2D) croppedImage.getGraphics();
         g.drawImage(originalImage, 0, 0, frame.width, frame.height,
-                frame.x, frame.y, frame.x + frame.width, frame.y + frame.height, null);
+                frame.x, frame.y, (int) frame.getMaxX(), (int) frame.getMaxY(), null);
         g.dispose();
 
         return croppedImage;
