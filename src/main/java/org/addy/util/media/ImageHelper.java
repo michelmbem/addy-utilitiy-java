@@ -189,60 +189,61 @@ public final class ImageHelper {
     }
 
     /**
-     * Removes the specified number of pixels from each edge of an image.
-     * Negative crop amounts leave the original image unchanged; a crop that removes all
-     * available content returns a 1-by-1 placeholder image.
+     * Crops an image to the rectangular frame specified in source-image coordinates.<br/>
+     * A crop that removes all available content returns a 1-by-1 placeholder image.
      *
      * @param originalImage image to crop
-     * @param left pixels to remove from the left edge
-     * @param top pixels to remove from the top edge
-     * @param right pixels to remove from the right edge
-     * @param bottom pixels to remove from the bottom edge
-     * @return the cropped image, or the original image when a crop amount is negative
+     * @param frame rectangle of content to retain
+     * @return the cropped image
+     * @throws IllegalArgumentException when the specified frame exceeds the source-image dimensions
      */
-    public static Image crop(Image originalImage, int left, int top, int right, int bottom) {
-        if (left < 0 || top < 0 || right < 0 || bottom < 0)
-        	return originalImage;
+    public static Image crop(Image originalImage, Rectangle frame) {
+        if (frame.x < 0 || frame.y < 0
+                || frame.width > originalImage.getWidth(null)
+                || frame.height > originalImage.getHeight(null))
+            throw new IllegalArgumentException("Crop bounds exceed the original image size");
 
-        int width = originalImage.getWidth(null);
-        int height = originalImage.getHeight(null);
-        int croppedWidth = width - left - right;
-        int croppedHeight = height - top - bottom;
-
-        if (croppedWidth <= 0 || croppedHeight <= 0)
+        if (frame.width <= 0 || frame.height <= 0)
             return new BufferedImage(1, 1, BufferedImage.TYPE_INT_RGB);
 
-        Image croppedImage = new BufferedImage(croppedWidth, croppedHeight, BufferedImage.TYPE_INT_RGB);
+        Image croppedImage = new BufferedImage(frame.width, frame.height, BufferedImage.TYPE_INT_RGB);
         var g = (Graphics2D) croppedImage.getGraphics();
-        g.drawImage(originalImage, 0, 0, croppedWidth, croppedHeight,
-                left, top, width - right, height - bottom, null);
+        g.drawImage(originalImage, 0, 0, frame.width, frame.height,
+                frame.x, frame.y, frame.x + frame.width, frame.y + frame.height, null);
         g.dispose();
 
         return croppedImage;
     }
 
     /**
-     * Crops an image by the amounts specified in the insets.
+     * Removes the specified number of pixels from each edge of an image.<br/>
+     * A crop that removes all available content returns a 1-by-1 placeholder image.
+     *
+     * @param originalImage image to crop
+     * @param left pixels to remove from the left edge
+     * @param top pixels to remove from the top edge
+     * @param right pixels to remove from the right edge
+     * @param bottom pixels to remove from the bottom edge
+     * @return the cropped image
+     * @throws IllegalArgumentException if any of the crop amounts is negative
+     */
+    public static Image crop(Image originalImage, int left, int top, int right, int bottom) {
+        int width = originalImage.getWidth(null) - right;
+        int height = originalImage.getHeight(null) - bottom;
+        return crop(originalImage, new Rectangle(left, top, width, height));
+    }
+
+    /**
+     * Crops an image by the amounts specified in the insets.<br/>
+     * A crop that removes all available content returns a 1-by-1 placeholder image.
      *
      * @param originalImage image to crop
      * @param insets crop amounts for the top, left, bottom, and right edges
      * @return the cropped image
+     * @throws IllegalArgumentException if any of the crop insets is negative
      */
     public static Image crop(Image originalImage, Insets insets) {
         return crop(originalImage, insets.left, insets.top, insets.right, insets.bottom);
-    }
-
-    /**
-     * Crops an image to the rectangular frame specified in source-image coordinates.
-     *
-     * @param originalImage image to crop
-     * @param frame rectangle of content to retain
-     * @return the cropped image
-     */
-    public static Image crop(Image originalImage, Rectangle frame) {
-        int right = originalImage.getWidth(null) - frame.x - frame.width;
-        int bottom = originalImage.getHeight(null) - frame.y - frame.height;
-        return crop(originalImage, frame.x, frame.y, right, bottom);
     }
 
     /**
