@@ -20,7 +20,7 @@ class ImageHelperTest {
 	@BeforeAll
 	static void setup() {
 		String[] names = {"jordan", "daniel"};
-		String[] modifiers = {"corrected", "gs", "sepia", "flipped", "bordered", "stripped"};
+		String[] modifiers = {"corrected", "gs", "sepia", "rotated", "flipped", "bordered", "stripped"};
 		String[] generated = {"tiles", "sprite"};
 		FileFilter filter = new FileUtil.PatternFilter("tenor-frame-\\d+\\.png");
 		File file;
@@ -176,6 +176,21 @@ class ImageHelperTest {
 			Image destImage2 = ImageHelper.stripBorder(destImage1, Color.LIGHT_GRAY);
 			ImageIO.write((RenderedImage) destImage2, JpegImageHelper.FORMAT, destFile2);
 			assertTrue(destFile2.isFile());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@Test
+	@Order(7)
+	void canRotate() {
+		try {
+			File srcFile = new File("files/jordan-corrected.jpg");
+			File destFile = new File("files/jordan-rotated.jpg");
+			Image srcImage = ImageIO.read(srcFile);
+			Image destImage = ImageHelper.rotate(srcImage, Math.PI / 4, Color.WHITE);
+			ImageIO.write((RenderedImage) destImage, JpegImageHelper.FORMAT, destFile);
+			assertTrue(destFile.isFile());
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

@@ -130,33 +130,50 @@ public final class ImageHelper {
     }
 
     /**
+     * Rotates an image by the specified angle, expanding the output dimensions
+     * to contain the entire rotated image and centering it in the output.
+     * The uncovered area is filled with the specified background paint.
+     *
+     * @param originalImage image to rotate
+     * @param radians rotation angle in radians
+     * @param background paint used to fill the uncovered area
+     * @return the centered, rotated image
+     */
+    public static Image rotate(Image originalImage, double radians, Paint background) {
+        int width = originalImage.getWidth(null);
+        int height = originalImage.getHeight(null);
+        double sin = Math.abs(Math.sin(radians));
+        double cos = Math.abs(Math.cos(radians));
+        int rotatedWidth = (int) (width * cos + height * sin);
+        int rotatedHeight = (int) (width * sin + height * cos);
+
+        AffineTransform at = new AffineTransform();
+        at.translate(rotatedWidth / 2.0, rotatedHeight / 2.0);
+        at.rotate(radians);
+        at.translate(-width / 2.0, -height / 2.0);
+
+        int imageType = background.getTransparency() == Transparency.OPAQUE
+                ? BufferedImage.TYPE_INT_RGB : BufferedImage.TYPE_INT_ARGB;
+        Image rotatedImage = new BufferedImage(rotatedWidth, rotatedHeight, imageType);
+
+        var g = (Graphics2D) rotatedImage.getGraphics();
+        g.setPaint(background);
+        g.fillRect(0, 0, rotatedWidth, rotatedHeight);
+        g.drawImage(originalImage, at, null);
+        g.dispose();
+
+        return rotatedImage;
+    }
+
+    /**
      * Rotates an image by the angle represented by {@code angle}.
-     * Quarter-turn rotations swap the output width and height.
      *
      * @param originalImage image to rotate
      * @param angle rotation to apply
      * @return the rotated image
      */
     public static Image rotate(Image originalImage, RotationAngle angle) {
-        int width = originalImage.getWidth(null);
-        int height = originalImage.getHeight(null);
-        AffineTransform at = AffineTransform.getRotateInstance(
-                angle.getRadians(), width / 2.0, height / 2.0);
-        
-        Image rotatedImage;
-        if (RotationAngle.DCW.equals(angle)) {
-            rotatedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
-        } else {
-            double translation = angle.getDirection() * (width - height) / 2.0;
-            at.translate(translation, translation);
-            rotatedImage = new BufferedImage(height, width, BufferedImage.TYPE_INT_RGB);
-        }
-        
-        var g = (Graphics2D) rotatedImage.getGraphics();
-        g.drawImage(originalImage, at, null);
-        g.dispose();
-
-        return rotatedImage;
+        return rotate(originalImage, angle.getRadians(), Color.BLACK);
     }
 
     /**
@@ -169,22 +186,16 @@ public final class ImageHelper {
     public static Image flip(Image originalImage, FlipAxis axis) {
         int width = originalImage.getWidth(null);
         int height = originalImage.getHeight(null);
+
+        AffineTransform at = new AffineTransform();
+        at.translate(axis.isHorizontal() ? width : 0, axis.isVertical() ? height : 0);
+        at.scale(axis.isHorizontal() ? -1 : 1, axis.isVertical() ? -1 : 1);
+
         var flippedImage = new BufferedImage(width, height, BufferedImage.TYPE_INT_RGB);
         var g = (Graphics2D) flippedImage.getGraphics();
-
-        if (axis.isHorizontal()) {
-            for (int i = 0, j = width - 1; i < width; ++i, --j) {
-                g.drawImage(originalImage, i, 0, i + 1, height, j, 0, j + 1, height, null);
-            }
-        }
-
-        if (axis.isVertical()) {
-            for (int i = 0, j = height - 1; i < height; ++i, --j) {
-                g.drawImage(originalImage, 0, i, width, i + 1, 0, j, width, j + 1, null);
-            }
-        }
-
+        g.drawImage(originalImage, at, null);
         g.dispose();
+
         return flippedImage;
     }
 
