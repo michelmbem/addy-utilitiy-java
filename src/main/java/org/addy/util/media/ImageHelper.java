@@ -228,8 +228,8 @@ public final class ImageHelper {
      * @throws IllegalArgumentException if any of the crop amounts is negative
      */
     public static Image crop(Image originalImage, int left, int top, int right, int bottom) {
-        int width = originalImage.getWidth(null) - right;
-        int height = originalImage.getHeight(null) - bottom;
+        int width = originalImage.getWidth(null) - left - right;
+        int height = originalImage.getHeight(null) - top - bottom;
         return crop(originalImage, new Rectangle(left, top, width, height));
     }
 
